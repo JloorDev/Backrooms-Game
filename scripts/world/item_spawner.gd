@@ -1,7 +1,6 @@
 extends Node
 class_name ItemSpawner
 
-# Registra aquí cada id de item con su escena correspondiente
 const ITEM_SCENES:Dictionary = {
 	"almond_water": preload("res://prefabs/interactables/almond_water.tscn"),
 }
@@ -20,7 +19,5 @@ func _on_item_dropped(data:ItemData) -> void:
 		return
 	var scene = ITEM_SCENES[data.id]
 	var instance = scene.instantiate()
-	# Lo instancia como hijo del nivel (el padre del ItemSpawner)
 	get_parent().add_child(instance)
-	# Lo coloca frente al jugador con un pequeño offset
 	instance.global_position = _player.global_position + Vector2(24, 24)

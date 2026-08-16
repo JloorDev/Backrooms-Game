@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://ceiling_light"]
+
+[ext_resource type="Script" path="res://scripts/enviroment/light_flicker.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://bir2m8uobp8xv" path="res://resources/light_texture.tres" id="2_tex"]
+
+[node name="CeilingLight" type="PointLight2D"]
+script = ExtResource("1_script")
+color = Color(0.92156863, 0.8, 0.49019608, 1)
+energy = 0.20
+texture = ExtResource("2_tex")
+texture_scale = 9.0

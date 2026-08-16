@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://danks87irmxh8"]
+
+[ext_resource type="Script" uid="uid://bay00qqgb7msg" path="res://scenes/main.gd" id="1_tipki"]
+[ext_resource type="TileSet" uid="uid://ckdlnxkh7orkj" path="res://resources/tilemap.tres" id="2_85g3d"]
+[ext_resource type="PackedScene" uid="uid://bxoag47ttes1x" path="res://prefabs/player.tscn" id="3_choun"]
+[ext_resource type="Script" uid="uid://bqrgsh0o85ocx" path="res://scripts/player/movement.gd" id="4_ya4ey"]
+[ext_resource type="Script" uid="uid://6byeo4fkbnjv" path="res://scripts/world/item_spawner.gd" id="5_eb6dy"]
+[ext_resource type="Script" uid="uid://fyrk3jj4egtu" path="res://scripts/world/world.gd" id="6_trceg"]
+[ext_resource type="Script" uid="uid://mhjqy1td0p1a" path="res://scripts/enviroment/room_ambient.gd" id="7_tipki"]
+[ext_resource type="Script" uid="uid://djvjtc2yg1u7u" path="res://scripts/world/wall_transparency.gd" id="8_jkv2x"]
+
+[node name="Main" type="Node2D" unique_id=1279682653]
+script = ExtResource("1_tipki")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1070753230]
+tile_set = ExtResource("2_85g3d")
+
+[node name="Lights" type="Node2D" parent="." unique_id=1918591771]
+
+[node name="YSortRoot" type="Node2D" parent="." unique_id=1435325970]
+y_sort_enabled = true
+
+[node name="Walls" type="Node2D" parent="YSortRoot" unique_id=1443642397]
+y_sort_enabled = true
+
+[node name="Columns" type="Node2D" parent="YSortRoot" unique_id=1397021661]
+y_sort_enabled = true
+
+[node name="Player" parent="YSortRoot" unique_id=771137993 instance=ExtResource("3_choun")]
+script = ExtResource("4_ya4ey")
+
+[node name="ItemSpawner" type="Node" parent="." unique_id=487056762]
+script = ExtResource("5_eb6dy")
+metadata/_custom_type_script = "uid://6byeo4fkbnjv"
+
+[node name="WorldManager" type="Node" parent="." unique_id=1503345632]
+script = ExtResource("6_trceg")
+
+[node name="RoomAmbient" type="CanvasModulate" parent="." unique_id=913995944]
+color = Color(0.3019608, 0.24705882, 0.13333334, 1)
+script = ExtResource("7_tipki")
+
+[node name="WallTransparency" type="Node" parent="." unique_id=100033467]
+script = ExtResource("8_jkv2x")

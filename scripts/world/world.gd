@@ -7,13 +7,17 @@ const SOURCE_ID      = 0
 
 const TILE_FLOOR := Vector2i(0, 0)
 
-# Cuántas paredes instanciar por frame fuera de la carga inicial
 const WALLS_PER_FRAME = 8
 
 @onready var tile_map: TileMapLayer  = $"../TileMapLayer"
 @onready var player: CharacterBody2D = $"../YSortRoot/Player"
 @onready var walls_root: Node2D      = $"../YSortRoot/Walls"
 @onready var columns_root: Node2D    = $"../YSortRoot/Columns"
+@onready var lights_root: Node2D = $"../Lights"
+
+var light_scene: PackedScene
+var light_instances: Dictionary = {}
+var _lights_queue: Array = []
 
 var wall_scene:   PackedScene
 var column_scene: PackedScene
@@ -25,7 +29,6 @@ var chunks_to_load: Array        = []
 var wall_instances: Dictionary   = {}
 var column_instances: Dictionary = {}
 
-# Cola de paredes pendientes de instanciar (distribuidas en frames)
 var _walls_queue:   Array = []
 var _columns_queue: Array = []
 
@@ -44,6 +47,7 @@ func _ready() -> void:
 	world_seed   = randi()
 	wall_scene   = load("res://prefabs/world/wall.tscn")
 	column_scene = load("res://prefabs/world/column.tscn")
+	light_scene = load("res://prefabs/world/ceiling_light.tscn")
 
 	for dy in range(-ACTIVE_RADIUS, ACTIVE_RADIUS + 1):
 		for dx in range(-ACTIVE_RADIUS, ACTIVE_RADIUS + 1):
@@ -64,7 +68,6 @@ func _process(_delta: float) -> void:
 	var tile_pos = tile_map.local_to_map(player.global_position)
 	if tile_pos.distance_squared_to(last_tile_pos) < TILE_THRESHOLD * TILE_THRESHOLD:
 		_process_instance_queues()
-		# Cargar chunks en cola aunque el jugador no se haya movido
 		if not chunks_to_load.is_empty():
 			_load_chunk(chunks_to_load.pop_front())
 		return
@@ -78,10 +81,8 @@ func _process(_delta: float) -> void:
 	if not chunks_to_load.is_empty():
 		_load_chunk(chunks_to_load.pop_front())
 
-# ── CARGA INICIAL ─────────────────────────────────────────────
 func _process_initial_load() -> void:
 	if _initial_chunks.is_empty():
-		# Vaciar las colas síncronamente antes de terminar
 		_flush_queues()
 		_initial_load_complete = true
 		_initial_load_finished()
@@ -124,8 +125,6 @@ func _is_safe_spawn(tile: Vector2i) -> bool:
 			return false
 	return true
 
-# ── COLAS DE INSTANCIAS ───────────────────────────────────────
-# Instancia N paredes/columnas por frame para evitar spikes
 func _process_instance_queues() -> void:
 	var budget = WALLS_PER_FRAME
 
@@ -145,8 +144,15 @@ func _process_instance_queues() -> void:
 			columns_root.add_child(col)
 			col.position = tile_map.map_to_local(col_pos) + Vector2(0, 4)
 			column_instances[col_pos] = col
+	
+	while not _lights_queue.is_empty():
+		var light_pos: Vector2i = _lights_queue.pop_front()
+		if not light_instances.has(light_pos):
+			var light = light_scene.instantiate()
+			lights_root.add_child(light)
+			light.position = tile_map.map_to_local(light_pos) + Vector2(0, -8)
+			light_instances[light_pos] = light
 
-# Vaciar colas completamente de golpe (solo en carga inicial)
 func _flush_queues() -> void:
 	for cell_pos in _walls_queue:
 		if not wall_instances.has(cell_pos):
@@ -163,8 +169,15 @@ func _flush_queues() -> void:
 			col.position = tile_map.map_to_local(col_pos) + Vector2(0, 4)
 			column_instances[col_pos] = col
 	_columns_queue.clear()
+	
+	for light_pos in _lights_queue:
+		if not light_instances.has(light_pos):
+			var light = light_scene.instantiate()
+			lights_root.add_child(light)
+			light.position = tile_map.map_to_local(light_pos) + Vector2(0, -8)
+			light_instances[light_pos] = light
+	_lights_queue.clear()
 
-# ── GESTIÓN DE CHUNKS ─────────────────────────────────────────
 func _update_chunks(center: Vector2i) -> void:
 	var needed := {}
 	for dy in range(-ACTIVE_RADIUS, ACTIVE_RADIUS + 1):
@@ -182,31 +195,31 @@ func _load_chunk(coord: Vector2i) -> void:
 	chunk.generate(coord, world_seed)
 	loaded_chunks[coord] = chunk
 
-	# Pintar suelo en batch
 	for cell_pos in chunk.cells:
 		if chunk.cells[cell_pos] == Chunk.CELL_FLOOR:
 			tile_map.set_cell(cell_pos, SOURCE_ID, TILE_FLOOR)
 
-	# Encolar paredes en vez de instanciarlas todas de golpe
 	for cell_pos in chunk.cells:
 		if chunk.cells[cell_pos] == Chunk.CELL_WALL:
 			if _borders_floor_global(cell_pos) and not wall_instances.has(cell_pos):
 				if not cell_pos in _walls_queue:
 					_walls_queue.append(cell_pos)
 
-	# Rellenar bordes de chunks vecinos
 	_refresh_neighbor_borders(coord)
 
-	# Encolar columnas
 	for col_pos in chunk.columns:
 		if not column_instances.has(col_pos):
 			if not col_pos in _columns_queue:
 				_columns_queue.append(col_pos)
+	
+	for light_pos in chunk.lights:
+		if not light_instances.has(light_pos):
+			if not light_pos in _lights_queue:
+				_lights_queue.append(light_pos)
 
 func _unload_chunk(coord: Vector2i) -> void:
 	var chunk: Chunk = loaded_chunks[coord]
 
-	# Un solo bucle para borrar suelo Y paredes
 	for cell_pos in chunk.cells.keys():
 		match chunk.cells[cell_pos]:
 			Chunk.CELL_FLOOR:
@@ -215,7 +228,6 @@ func _unload_chunk(coord: Vector2i) -> void:
 				if wall_instances.has(cell_pos):
 					wall_instances[cell_pos].queue_free()
 					wall_instances.erase(cell_pos)
-				# Limpiar de la cola si aún no se instanció
 				_walls_queue.erase(cell_pos)
 
 	for col_pos in chunk.columns:
@@ -223,14 +235,19 @@ func _unload_chunk(coord: Vector2i) -> void:
 			column_instances[col_pos].queue_free()
 			column_instances.erase(col_pos)
 		_columns_queue.erase(col_pos)
+	
+	for light_pos in chunk.lights:
+		if light_instances.has(light_pos):
+			light_instances[light_pos].queue_free()
+			light_instances.erase(light_pos)
+		_lights_queue.erase(light_pos)
 
 	chunk.cells.clear()
 	chunk.columns.clear()
+	chunk.lights.clear()
 	chunk_pool.append(chunk)
 	loaded_chunks.erase(coord)
 
-# ── MUROS CROSS-CHUNK ─────────────────────────────────────────
-# O(4) — busca directamente en el chunk correcto
 func _borders_floor_global(pos: Vector2i) -> bool:
 	var neighbors = [
 		Vector2i(pos.x+1, pos.y), Vector2i(pos.x-1, pos.y),
@@ -243,7 +260,6 @@ func _borders_floor_global(pos: Vector2i) -> bool:
 				return true
 	return false
 
-# Solo revisa el borde compartido con cada vecino
 func _refresh_neighbor_borders(coord: Vector2i) -> void:
 	var neighbor_coords = [
 		coord + Vector2i(1, 0), coord + Vector2i(-1, 0),
@@ -260,28 +276,26 @@ func _refresh_neighbor_borders(coord: Vector2i) -> void:
 					if _borders_floor_global(cell_pos):
 						_walls_queue.append(cell_pos)
 
-# Devuelve solo los tiles del borde compartido entre dos chunks vecinos
 func _get_shared_border(a: Vector2i, b: Vector2i) -> Array:
 	var result: Array = []
 	var b_offset = b * CHUNK_SIZE
 	var diff = b - a
 
-	if diff.x == 1:       # b está a la derecha de a → borde izquierdo de b
+	if diff.x == 1:
 		for y in range(CHUNK_SIZE):
 			result.append(Vector2i(b_offset.x, b_offset.y + y))
-	elif diff.x == -1:    # b está a la izquierda → borde derecho de b
+	elif diff.x == -1:
 		for y in range(CHUNK_SIZE):
 			result.append(Vector2i(b_offset.x + CHUNK_SIZE - 1, b_offset.y + y))
-	elif diff.y == 1:     # b está abajo → borde superior de b
+	elif diff.y == 1:
 		for x in range(CHUNK_SIZE):
 			result.append(Vector2i(b_offset.x + x, b_offset.y))
-	elif diff.y == -1:    # b está arriba → borde inferior de b
+	elif diff.y == -1:
 		for x in range(CHUNK_SIZE):
 			result.append(Vector2i(b_offset.x + x, b_offset.y + CHUNK_SIZE - 1))
 
 	return result
 
-# ── POOL Y UTILIDADES ─────────────────────────────────────────
 func _get_chunk() -> Chunk:
 	if chunk_pool.size() > 0:
 		return chunk_pool.pop_back()

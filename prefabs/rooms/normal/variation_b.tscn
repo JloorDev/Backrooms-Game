@@ -1,6 +1,6 @@
 [gd_scene format=4 uid="uid://bn4ayrgglteox"]
 
-[ext_resource type="TileSet" uid="uid://ckdlnxkh7orkj" path="res://tilemap.tres" id="1_m7udi"]
+[ext_resource type="TileSet" uid="uid://ckdlnxkh7orkj" path="res://resources/tilemap.tres" id="1_m7udi"]
 
 [node name="VariatonB" type="Node2D" unique_id=417391780]
 

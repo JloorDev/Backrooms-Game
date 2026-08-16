@@ -1,6 +1,6 @@
 [gd_scene format=4 uid="uid://0hwll1e4alqu"]
 
-[ext_resource type="TileSet" uid="uid://ckdlnxkh7orkj" path="res://tilemap.tres" id="1_d78kr"]
+[ext_resource type="TileSet" uid="uid://ckdlnxkh7orkj" path="res://resources/tilemap.tres" id="1_d78kr"]
 
 [node name="VariatonC" type="Node2D" unique_id=417391780]
 

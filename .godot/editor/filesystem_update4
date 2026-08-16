@@ -1,0 +1,14 @@
+res://scripts/world/wall_transparency.gd
+res://resources/items/consumables/almond_water.tres
+res://scenes/test.tscn
+res://tilemap.tres
+res://scenes/main.tscn
+res://scripts/ui/vignette.gd
+res://scripts/enviroment/light_flicker.gd
+res://prefabs/world/ceiling_light.tscn
+res://scripts/world/chunk.gd
+res://scripts/world/world.gd
+res://scripts/world/room_stamper.gd
+res://scripts/world/item_spawner.gd
+res://prefabs/hud.tscn
+res://resources/tilemap.tres

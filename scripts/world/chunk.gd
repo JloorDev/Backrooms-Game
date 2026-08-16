@@ -7,26 +7,28 @@ const CELL_WALL     = 1
 const BORDER_OFFSET = 8
 const COL_SPACING   = 4
 
-# Probabilidad de que una habitación BSP sea reemplazada por prefab
 const PREFAB_ROOM_CHANCE     = 0.30
-# Probabilidad de que un corredor entre habitaciones sea prefab
 const PREFAB_CORRIDOR_CHANCE = 0.20
+
+const LIGHT_CHANCE = 0.00
+const SECOND_LIGHT_CHANCE = 0.40
 
 var chunk_coord: Vector2i
 var cells:   Dictionary = {}
 var columns: Array      = []
+var lights: Array = []
 
 func generate(coord: Vector2i, base_seed: int) -> void:
 	chunk_coord = coord
 	cells.clear()
 	columns.clear()
+	lights.clear()
 
 	var rng = RandomNumberGenerator.new()
 	rng.seed = hash(Vector2i(coord.x * 7919 + base_seed, coord.y * 6271 + base_seed))
 
 	var offset = coord * CHUNK_SIZE
 
-	# Todo empieza como pared
 	for y in range(CHUNK_SIZE):
 		for x in range(CHUNK_SIZE):
 			cells[Vector2i(offset.x + x, offset.y + y)] = CELL_WALL
@@ -50,7 +52,17 @@ func generate(coord: Vector2i, base_seed: int) -> void:
 			var room_y = qy_start + rng.randi_range(margin, maxi(margin, half - room_h - margin))
 			rooms.append({"x": room_x, "y": room_y, "w": room_w, "h": room_h})
 
-			# Decidir: habitación normal o prefabricada
+			if rng.randf() < LIGHT_CHANCE:
+				var light_pos = Vector2i(room_x + room_w / 2, room_y + room_h / 2)
+				lights.append(light_pos)
+
+				if is_large and rng.randf() < SECOND_LIGHT_CHANCE:
+					var second_offset = Vector2i(
+						rng.randi_range(-room_w / 3, room_w / 3),
+						rng.randi_range(-room_h / 3, room_h / 3)
+					)
+					lights.append(light_pos + second_offset)
+	
 			if rng.randf() < PREFAB_ROOM_CHANCE:
 				_stamp_prefab_room(room_x, room_y, room_w, room_h, rng)
 			else:
@@ -85,23 +97,16 @@ func generate(coord: Vector2i, base_seed: int) -> void:
 		cells[Vector2i(offset.x, by + i)] = CELL_FLOOR
 		cells[Vector2i(offset.x + CHUNK_SIZE - 1, by + i)] = CELL_FLOOR
 
-# ─────────────────────────────────────────
-#  HABITACIÓN BSP NORMAL
-# ─────────────────────────────────────────
 func _stamp_bsp_room(rx: int, ry: int, rw: int, rh: int, rng: RandomNumberGenerator) -> void:
 	for y in range(rh):
 		for x in range(rw):
 			cells[Vector2i(rx + x, ry + y)] = CELL_FLOOR
 	_place_columns(rx, ry, rw, rh, rng)
 
-# ─────────────────────────────────────────
-#  HABITACIÓN PREFABRICADA
-# ─────────────────────────────────────────
 func _stamp_prefab_room(rx: int, ry: int, rw: int, rh: int, rng: RandomNumberGenerator) -> void:
 	var scene_path = PrefabRegistry.pick_room(rng)
 	var result     = RoomStamper.stamp_from_scene(scene_path, rx, ry)
 
-	# Aplicar solo las celdas que están dentro del chunk
 	for pos in result.cells:
 		if cells.has(pos):
 			cells[pos] = result.cells[pos]
@@ -114,12 +119,8 @@ func _stamp_prefab_room(rx: int, ry: int, rw: int, rh: int, rng: RandomNumberGen
 	if result.cells.is_empty():
 		_stamp_bsp_room(rx, ry, rw, rh, rng)
 
-# ─────────────────────────────────────────
-#  CORREDOR PREFABRICADO
-# ─────────────────────────────────────────
 func _stamp_prefab_corridor(a: Vector2i, b: Vector2i, rng: RandomNumberGenerator) -> void:
 	var scene_path = PrefabRegistry.pick_corridor(rng)
-	# Usar stamp_corridor que rota y escala automáticamente
 	var result = RoomStamper.stamp_corridor(scene_path, a, b)
  
 	for pos in result.cells:
@@ -130,9 +131,6 @@ func _stamp_prefab_corridor(a: Vector2i, b: Vector2i, rng: RandomNumberGenerator
 		if cells.get(col, CELL_WALL) == CELL_FLOOR:
 			columns.append(col)
 
-# ─────────────────────────────────────────
-#  COLUMNAS EN HABITACIÓN BSP
-# ─────────────────────────────────────────
 func _place_columns(room_x: int, room_y: int, room_w: int, room_h: int, rng: RandomNumberGenerator) -> void:
 	if room_w < 5 or room_h < 5:
 		return
@@ -153,9 +151,6 @@ func _place_columns(room_x: int, room_y: int, room_w: int, room_h: int, rng: Ran
 			cy += COL_SPACING
 		cx += COL_SPACING
 
-# ─────────────────────────────────────────
-#  CORREDORES
-# ─────────────────────────────────────────
 func _carve_to_nearest(from: Vector2i, centers: Array) -> void:
 	var nearest   = centers[0]
 	var best_dist = from.distance_squared_to(centers[0])

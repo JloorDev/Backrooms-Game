@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://danks87irmxh8"]
+
+[ext_resource type="PackedScene" uid="uid://bxoag47ttes1x" path="res://prefabs/player.tscn" id="1_bl13t"]
+[ext_resource type="Script" uid="uid://bay00qqgb7msg" path="res://scenes/test.gd" id="1_j5jx5"]
+[ext_resource type="Script" uid="uid://bqrgsh0o85ocx" path="res://scripts/player/movement.gd" id="2_iyx0m"]
+[ext_resource type="TileSet" uid="uid://ckdlnxkh7orkj" path="res://tilemap.tres" id="2_uacia"]
+[ext_resource type="Script" uid="uid://6byeo4fkbnjv" path="res://scripts/world/item_spawner.gd" id="4_74lek"]
+[ext_resource type="Script" uid="uid://fyrk3jj4egtu" path="res://scripts/world/world.gd" id="7_at5dv"]
+[ext_resource type="Script" uid="uid://mhjqy1td0p1a" path="res://scripts/enviroment/canvas_modulate.gd" id="8_jcd4p"]
+[ext_resource type="Script" uid="uid://djvjtc2yg1u7u" path="res://scripts/world/wall_transparency.gd" id="9_uacia"]
+
+[node name="Test" type="Node2D" unique_id=1279682653]
+script = ExtResource("1_j5jx5")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=1070753230]
+tile_set = ExtResource("2_uacia")
+
+[node name="YSortRoot" type="Node2D" parent="." unique_id=1435325970]
+y_sort_enabled = true
+
+[node name="Walls" type="Node2D" parent="YSortRoot" unique_id=1443642397]
+y_sort_enabled = true
+
+[node name="Columns" type="Node2D" parent="YSortRoot" unique_id=1397021661]
+y_sort_enabled = true
+
+[node name="Player" parent="YSortRoot" unique_id=771137993 instance=ExtResource("1_bl13t")]
+script = ExtResource("2_iyx0m")
+
+[node name="ItemSpawner" type="Node" parent="." unique_id=487056762]
+script = ExtResource("4_74lek")
+metadata/_custom_type_script = "uid://6byeo4fkbnjv"
+
+[node name="WorldManager" type="Node" parent="." unique_id=1503345632]
+script = ExtResource("7_at5dv")
+
+[node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=913995944]
+color = Color(0.3019608, 0.24705882, 0.13333334, 1)
+script = ExtResource("8_jcd4p")
+
+[node name="WallTransparency" type="Node" parent="." unique_id=100033467]
+script = ExtResource("9_uacia")

@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://slhi5pkx03tm"]
+
+[ext_resource type="Script" uid="uid://7asktdab4ovw" path="res://scripts/ui/inventory_slot.gd" id="1_ra5ct"]
+
+[node name="InventorySlot" type="Panel" unique_id=203148431]
+custom_minimum_size = Vector2(64, 64)
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_ra5ct")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=811595598]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 3
+stretch_mode = 5
+
+[node name="QuantityLabel" type="Label" parent="." unique_id=91678004]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 5.0
+offset_top = -28.0
+offset_right = 45.0
+offset_bottom = -5.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 10
+text = "x1"
+vertical_alignment = 2

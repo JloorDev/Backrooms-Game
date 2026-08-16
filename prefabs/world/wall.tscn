@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://wall"]
+
+[ext_resource type="Texture2D" uid="uid://c4m1t7c54papf" path="res://sprites/wall.png" id="1_tex"]
+
+[node name="Wall" type="StaticBody2D" unique_id=1483134269]
+y_sort_enabled = true
+
+[node name="Sprite" type="Sprite2D" parent="." unique_id=1447921638]
+texture = ExtResource("1_tex")
+centered = false
+offset = Vector2(-8, -24)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=1835593222]
+position = Vector2(0, 4)
+polygon = PackedVector2Array(-8, -7, 8, -7, 8, -4, 1, 0, -1, 0, -8, -4)

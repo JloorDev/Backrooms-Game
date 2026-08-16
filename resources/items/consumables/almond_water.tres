@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="ConsumableData" format=3 uid="uid://bh8jy68aby4ky"]
+
+[ext_resource type="Script" uid="uid://dt32rf5yk6vbr" path="res://scripts/items/consumable_data.gd" id="1_pk0p6"]
+
+[sub_resource type="Gradient" id="Gradient_pk0p6"]
+offsets = PackedFloat32Array(1)
+colors = PackedColorArray(4.235506e-06, 0.7841252, 0.9754028, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_27s5t"]
+gradient = SubResource("Gradient_pk0p6")
+width = 16
+height = 32
+fill_from = Vector2(0, 0.015217391)
+
+[resource]
+script = ExtResource("1_pk0p6")
+thirst_restore = 40.0
+sanity_restore = 15.0
+id = "almond_water"
+display_name = "Agua de Almendras"
+description = "Huele dulce. Calma algo."
+icon = SubResource("GradientTexture2D_27s5t")
+weight = 0.3
+metadata/_custom_type_script = "uid://dt32rf5yk6vbr"

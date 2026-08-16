@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://7wwa43ml7t5y"]
+
+[ext_resource type="Script" uid="uid://dvdhfomp7thd6" path="res://scripts/items/consumables/almond_water.gd" id="1_ky1gv"]
+[ext_resource type="Resource" uid="uid://bh8jy68aby4ky" path="res://resources/items/consumables/almond_water.tres" id="2_voqqc"]
+
+[sub_resource type="Gradient" id="Gradient_xueyp"]
+offsets = PackedFloat32Array(1)
+colors = PackedColorArray(1.92523e-06, 0.8514167, 0.85186684, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_ky1gv"]
+gradient = SubResource("Gradient_xueyp")
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_voqqc"]
+radius = 11.0
+
+[node name="AlmondWater" type="Area2D" unique_id=1858868849]
+script = ExtResource("1_ky1gv")
+data = ExtResource("2_voqqc")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1145013172]
+scale = Vector2(0.045, 16.126)
+texture = SubResource("GradientTexture1D_ky1gv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1248610795]
+shape = SubResource("CircleShape2D_voqqc")
+
+[node name="InteractPrompt" type="Label" parent="." unique_id=1894028121]
+offset_right = 40.0
+offset_bottom = 23.0

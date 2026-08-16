@@ -1,0 +1,83 @@
+[gd_scene format=3 uid="uid://dtfpghxbcxgdp"]
+
+[ext_resource type="Script" uid="uid://ch125130dwlu" path="res://prefabs/ui/loading_screen.gd" id="1_script"]
+[ext_resource type="Shader" uid="uid://bpkjc04pakird" path="res://shaders/blur.gdshader" id="2_shader"]
+
+[sub_resource type="ShaderMaterial" id="1_mat"]
+shader = ExtResource("2_shader")
+shader_parameter/blur_amount = 3.0
+shader_parameter/tint_color = Color(0.1, 0.1, 0.09, 0.45)
+
+[node name="LoadingScreen" type="CanvasLayer" unique_id=1001906004]
+layer = 10
+script = ExtResource("1_script")
+
+[node name="BG" type="ColorRect" parent="." unique_id=780028763]
+material = SubResource("1_mat")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0)
+
+[node name="Margin" type="MarginContainer" parent="BG" unique_id=903327114]
+layout_mode = 0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="Row" type="HBoxContainer" parent="BG/Margin" unique_id=706512985]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Left" type="VBoxContainer" parent="BG/Margin/Row" unique_id=119390282]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="LoadingLabel" type="Label" parent="BG/Margin/Row/Left" unique_id=695394166]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.82, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+text = "GENERATING WORLD"
+
+[node name="BarTrack" type="ColorRect" parent="BG/Margin/Row/Left" unique_id=451347928]
+custom_minimum_size = Vector2(220, 2)
+layout_mode = 2
+size_flags_horizontal = 0
+color = Color(0.25, 0.23, 0.2, 0.6)
+
+[node name="Bar" type="ColorRect" parent="BG/Margin/Row/Left/BarTrack" unique_id=677341814]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+color = Color(0.9, 0.78, 0.52, 1)
+
+[node name="Right" type="VBoxContainer" parent="BG/Margin/Row" unique_id=127788470]
+layout_mode = 2
+size_flags_horizontal = 0
+theme_override_constants/separation = 6
+alignment = 2
+
+[node name="Spinner" type="Label" parent="BG/Margin/Row/Right" unique_id=290518290]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.78, 0.52, 1)
+theme_override_font_sizes/font_size = 20
+text = "⠋"
+horizontal_alignment = 1
+
+[node name="EnterLabel" type="Label" parent="BG/Margin/Row/Right" unique_id=1958952731]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.82, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+text = "ENTER TO PLAY"
+horizontal_alignment = 1

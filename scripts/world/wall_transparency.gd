@@ -1,0 +1,56 @@
+extends Node
+
+# ─────────────────────────────────────────
+#  Wall Transparency
+#  Hace semitransparentes las paredes que
+#  tapan la vista del jugador
+# ─────────────────────────────────────────
+
+@onready var player: CharacterBody2D = $"../YSortRoot/Player"
+@onready var walls_root: Node2D      = $"../YSortRoot/Walls"
+@onready var columns_root: Node2D    = $"../YSortRoot/Columns"
+
+# Radio en píxeles para detectar paredes cercanas al jugador
+const CHECK_RADIUS  = 60.0
+const FADE_ALPHA    = 0.3   # opacidad al estar tapando
+const NORMAL_ALPHA  = 1.0   # opacidad normal
+const FADE_SPEED    = 8.0   # velocidad de transición
+
+# Objetos actualmente fadeados
+var _faded: Dictionary = {}  # Node -> float (alpha objetivo)
+
+func _process(delta: float) -> void:
+	var p_pos = player.global_position
+
+	# Resetear todos a normal primero
+	var should_fade: Dictionary = {}
+
+	# Revisar paredes
+	for wall in walls_root.get_children():
+		if _should_fade(wall, p_pos):
+			should_fade[wall] = FADE_ALPHA
+		else:
+			should_fade[wall] = NORMAL_ALPHA
+
+	# Revisar columnas
+	for col in columns_root.get_children():
+		if _should_fade(col, p_pos):
+			should_fade[col] = FADE_ALPHA
+		else:
+			should_fade[col] = NORMAL_ALPHA
+
+	# Aplicar transición suave
+	for node in should_fade:
+		var target_alpha: float = should_fade[node]
+		var sprite = node.get_node_or_null("Sprite")
+		if sprite:
+			var current = sprite.modulate.a
+			sprite.modulate.a = lerp(current, target_alpha, FADE_SPEED * delta)
+
+func _should_fade(wall: Node2D, player_pos: Vector2) -> bool:
+	var w_pos = wall.global_position
+
+	var dx = abs(w_pos.x - player_pos.x)
+	var dy = w_pos.y - player_pos.y  # positivo = pared está DEBAJO del jugador
+
+	return dx < CHECK_RADIUS * 0.6 and dy > 0 and dy < CHECK_RADIUS

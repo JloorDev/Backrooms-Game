@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://bxoag47ttes1x"]
+
+[ext_resource type="Script" uid="uid://dejn2beb877qe" path="res://scripts/player/camera.gd" id="1_72ieh"]
+[ext_resource type="Script" uid="uid://0f1rngorvpax" path="res://scripts/player/stats/hunger_stat.gd" id="2_4dohe"]
+[ext_resource type="Script" uid="uid://cfxwcmxdncsjr" path="res://scripts/player/stats/stats_manager.gd" id="2_ht1c8"]
+[ext_resource type="Script" uid="uid://dux1yg4e7bd25" path="res://scripts/player/stats/thirst_stat.gd" id="3_1txc5"]
+[ext_resource type="Script" uid="uid://bfnsdlbwr1701" path="res://scripts/player/stats/sanity_stat.gd" id="4_ht1c8"]
+[ext_resource type="Script" uid="uid://b2yn3djee7qt3" path="res://scripts/player/inventory_manager.gd" id="6_g2jcq"]
+[ext_resource type="Script" uid="uid://b54y7510b1qnf" path="res://scripts/player/stats/fatigue_stat.gd" id="6_rgeog"]
+[ext_resource type="Script" uid="uid://c876d6t5n826t" path="res://scripts/player/stats/sanity_effects.gd" id="7_opo22"]
+[ext_resource type="PackedScene" uid="uid://60n0abi25l71" path="res://prefabs/hud.tscn" id="7_u51tk"]
+[ext_resource type="Script" uid="uid://btb2mdwptj1ox" path="res://scripts/player/stats/player_state_manager.gd" id="8_8rb0w"]
+[ext_resource type="Texture2D" uid="uid://bir2m8uobp8xv" path="res://resources/light_texture.tres" id="8_kbsxf"]
+
+[sub_resource type="Gradient" id="Gradient_72ieh"]
+offsets = PackedFloat32Array(1)
+colors = PackedColorArray(1, 1, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_72ieh"]
+gradient = SubResource("Gradient_72ieh")
+width = 16
+height = 32
+fill_from = Vector2(0, 1)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fp3wc"]
+size = Vector2(8, 2)
+
+[node name="Player" type="CharacterBody2D" unique_id=771137993]
+
+[node name="Sprite" type="Sprite2D" parent="." unique_id=435634803]
+scale = Vector2(0.5, 0.5)
+texture = SubResource("GradientTexture2D_72ieh")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1336856469]
+position = Vector2(0, 7)
+shape = SubResource("RectangleShape2D_fp3wc")
+
+[node name="Camera" type="Camera2D" parent="." unique_id=996857251]
+zoom = Vector2(1.5, 1.5)
+script = ExtResource("1_72ieh")
+
+[node name="StatsManager" type="Node" parent="." unique_id=170826306]
+script = ExtResource("2_ht1c8")
+
+[node name="HungerStat" type="Node" parent="StatsManager" unique_id=221418312]
+script = ExtResource("2_4dohe")
+
+[node name="ThirstStat" type="Node" parent="StatsManager" unique_id=890901222]
+script = ExtResource("3_1txc5")
+
+[node name="SanityStat" type="Node" parent="StatsManager" unique_id=2121114248]
+script = ExtResource("4_ht1c8")
+
+[node name="FatigueStat" type="Node" parent="StatsManager" unique_id=1565534418]
+script = ExtResource("6_rgeog")
+
+[node name="SanityEffects" type="Node" parent="." unique_id=1194205318]
+script = ExtResource("7_opo22")
+camera_path = NodePath("../Camera")
+canvas_layer_path = NodePath("../HUD")
+
+[node name="PlayerStateManager" type="Node" parent="." unique_id=395721991]
+script = ExtResource("8_8rb0w")
+
+[node name="InventoryManager" type="Node" parent="." unique_id=22130029]
+script = ExtResource("6_g2jcq")
+
+[node name="HUD" parent="." unique_id=1040680160 instance=ExtResource("7_u51tk")]
+
+[node name="PointLight2D" type="PointLight2D" parent="." unique_id=507655505]
+color = Color(0.92156863, 0.8, 0.49019608, 1)
+energy = 0.45
+texture = ExtResource("8_kbsxf")
+texture_scale = 12.0

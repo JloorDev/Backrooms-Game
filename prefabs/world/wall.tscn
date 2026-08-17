@@ -8,15 +8,15 @@ polygon = PackedVector2Array(-8, -7, 8, -7, 8, -4, 1, 0, -1, 0, -8, -4)
 [node name="Wall" type="StaticBody2D" unique_id=1483134269]
 y_sort_enabled = true
 
-[node name="Sprite" type="Sprite2D" parent="." unique_id=1447921638]
+[node name="Sprite" type="Sprite2D" parent="." unique_id=1248830736]
 texture = ExtResource("1_tex")
 centered = false
 offset = Vector2(-8, -24)
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=1835593222]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=1210071644]
 position = Vector2(0, 4)
 polygon = PackedVector2Array(-8, -7, 8, -7, 8, -4, 1, 0, -1, 0, -8, -4)
 
-[node name="LightOccluder2D" type="LightOccluder2D" parent="."]
+[node name="LightOccluder2D" type="LightOccluder2D" parent="." unique_id=1388239189]
 position = Vector2(0, 4)
 occluder = SubResource("Occluder_wall")

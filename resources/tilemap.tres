@@ -1,13 +1,24 @@
 [gd_resource type="TileSet" format=3 uid="uid://ckdlnxkh7orkj"]
 
 [ext_resource type="Texture2D" uid="uid://71py5l0llk2h" path="res://sprites/floor.png" id="1_q3qn3"]
+[ext_resource type="PackedScene" uid="uid://wall" path="res://prefabs/world/wall.tscn" id="2_t41nh"]
+[ext_resource type="PackedScene" path="res://prefabs/world/ceiling_light.tscn" id="3_iyhun"]
+[ext_resource type="PackedScene" uid="uid://column" path="res://prefabs/world/column.tscn" id="4_y71pg"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_uacia"]
+resource_name = "floor"
 texture = ExtResource("1_q3qn3")
 0:0/0 = 0
+
+[sub_resource type="TileSetScenesCollectionSource" id="TileSetScenesCollectionSource_yjh7o"]
+resource_name = "scenes"
+scenes/1/scene = ExtResource("2_t41nh")
+scenes/2/scene = ExtResource("4_y71pg")
+scenes/3/scene = ExtResource("3_iyhun")
 
 [resource]
 tile_shape = 1
 tile_layout = 5
 tile_size = Vector2i(16, 8)
 sources/0 = SubResource("TileSetAtlasSource_uacia")
+sources/1 = SubResource("TileSetScenesCollectionSource_yjh7o")

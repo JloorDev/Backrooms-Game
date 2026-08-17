@@ -41,6 +41,11 @@ var _initial_done:   int         = 0
 var _loading_screen: Node        = null
 var _initial_load_complete: bool = false
 
+var _preload_paths: Array = []
+var _preload_total: int   = 0
+var _preload_index: int   = 0
+var _preload_done: bool   = false
+
 signal initial_load_complete
 
 func _ready() -> void:
@@ -56,6 +61,9 @@ func _ready() -> void:
 	_initial_total = _initial_chunks.size()
 	player.visible = false
 	player.set_physics_process(false)
+	
+	_preload_paths = PrefabRegistry.get_all_paths()
+	_preload_total = maxi(_preload_paths.size(), 1)
 
 func start_with_loading(loading_screen: Node) -> void:
 	_loading_screen = loading_screen
@@ -82,6 +90,10 @@ func _process(_delta: float) -> void:
 		_load_chunk(chunks_to_load.pop_front())
 
 func _process_initial_load() -> void:
+	if not _preload_done:
+		_process_preload()
+		return
+
 	if _initial_chunks.is_empty():
 		_flush_queues()
 		_initial_load_complete = true
@@ -91,7 +103,19 @@ func _process_initial_load() -> void:
 	_load_chunk(coord)
 	_initial_done += 1
 	if _loading_screen:
-		_loading_screen.set_progress(float(_initial_done) / float(_initial_total))
+		# El precargado de prefabs ocupa el primer 20% de la barra,
+		# la generación de chunks el 80% restante.
+		_loading_screen.set_progress(0.2 + 0.8 * float(_initial_done) / float(_initial_total))
+
+func _process_preload() -> void:
+	if _preload_paths.is_empty():
+		_preload_done = true
+		return
+	var path = _preload_paths.pop_front()
+	RoomStamper.preload_template(path)
+	_preload_index += 1
+	if _loading_screen:
+		_loading_screen.set_progress(0.2 * float(_preload_index) / float(_preload_total))
 
 func _initial_load_finished() -> void:
 	_spawn_player_on_floor()

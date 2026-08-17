@@ -10,8 +10,9 @@ const COL_SPACING   = 4
 const PREFAB_ROOM_CHANCE     = 0.30
 const PREFAB_CORRIDOR_CHANCE = 0.20
 
-const LIGHT_CHANCE = 0.00
+const LIGHT_CHANCE = 0.40
 const SECOND_LIGHT_CHANCE = 0.40
+const LARGE_ROOM_AREA = 8
 
 var chunk_coord: Vector2i
 var cells:   Dictionary = {}
@@ -41,37 +42,57 @@ func generate(coord: Vector2i, base_seed: int) -> void:
 			var qx_start = offset.x + qx * half
 			var qy_start = offset.y + qy * half
 
-			var is_large = rng.randf() < 0.25
-			var room_w = rng.randi_range(9, half - 1) if is_large else rng.randi_range(5, half - 2)
-			var room_h = rng.randi_range(8, half - 1) if is_large else rng.randi_range(4, half - 2)
-			room_w = mini(room_w, half - 2)
-			room_h = mini(room_h, half - 2)
+			# Si toca prefab, usamos SU tamaño real (no uno inventado al azar) —
+			# así el centro que calculamos después coincide con su geometría real.
+			var use_prefab  = rng.randf() < PREFAB_ROOM_CHANCE
+			var prefab_path = ""
+			var room_w: int
+			var room_h: int
+
+			if use_prefab:
+				prefab_path = PrefabRegistry.pick_room(rng)
+				var size = RoomStamper.get_scene_size(prefab_path)
+				room_w = size.x
+				room_h = size.y
+				if room_w > half - 2 or room_h > half - 2:
+					use_prefab = false  # no cabe en el cuadrante, cae a BSP normal
+
+			if not use_prefab:
+				var is_large = rng.randf() < 0.25
+				room_w = rng.randi_range(9, half - 1) if is_large else rng.randi_range(5, half - 2)
+				room_h = rng.randi_range(8, half - 1) if is_large else rng.randi_range(4, half - 2)
+				room_w = mini(room_w, half - 2)
+				room_h = mini(room_h, half - 2)
 
 			var margin = 2
 			var room_x = qx_start + rng.randi_range(margin, maxi(margin, half - room_w - margin))
 			var room_y = qy_start + rng.randi_range(margin, maxi(margin, half - room_h - margin))
-			rooms.append({"x": room_x, "y": room_y, "w": room_w, "h": room_h})
+
+			if use_prefab:
+				_stamp_prefab_room(prefab_path, room_x, room_y, room_w, room_h, rng)
+			else:
+				_stamp_bsp_room(room_x, room_y, room_w, room_h, rng)
+
+			# Punto real de conexión — el centro geométrico puede caer sobre
+			# una celda sólida en prefabs irregulares, así que buscamos la
+			# celda de piso más cercana a ese centro.
+			var raw_center = Vector2i(room_x + room_w / 2, room_y + room_h / 2)
+			var center     = _find_nearest_floor(raw_center)
+			rooms.append({"x": room_x, "y": room_y, "w": room_w, "h": room_h, "center": center})
 
 			if rng.randf() < LIGHT_CHANCE:
-				var light_pos = Vector2i(room_x + room_w / 2, room_y + room_h / 2)
-				lights.append(light_pos)
-
-				if is_large and rng.randf() < SECOND_LIGHT_CHANCE:
+				lights.append(center)
+				if room_w * room_h > LARGE_ROOM_AREA and rng.randf() < SECOND_LIGHT_CHANCE:
 					var second_offset = Vector2i(
 						rng.randi_range(-room_w / 3, room_w / 3),
 						rng.randi_range(-room_h / 3, room_h / 3)
 					)
-					lights.append(light_pos + second_offset)
-	
-			if rng.randf() < PREFAB_ROOM_CHANCE:
-				_stamp_prefab_room(room_x, room_y, room_w, room_h, rng)
-			else:
-				_stamp_bsp_room(room_x, room_y, room_w, room_h, rng)
+					lights.append(_find_nearest_floor(center + second_offset))
 
-	# Centros para corredores
+	# Centros para corredores (ahora garantizados dentro de piso real)
 	var centers: Array = []
 	for r in rooms:
-		centers.append(Vector2i(r.x + r.w / 2, r.y + r.h / 2))
+		centers.append(r["center"])
 
 	_carve_corridor(centers[0], centers[1])
 	_carve_corridor(centers[2], centers[3])
@@ -103,9 +124,8 @@ func _stamp_bsp_room(rx: int, ry: int, rw: int, rh: int, rng: RandomNumberGenera
 			cells[Vector2i(rx + x, ry + y)] = CELL_FLOOR
 	_place_columns(rx, ry, rw, rh, rng)
 
-func _stamp_prefab_room(rx: int, ry: int, rw: int, rh: int, rng: RandomNumberGenerator) -> void:
-	var scene_path = PrefabRegistry.pick_room(rng)
-	var result     = RoomStamper.stamp_from_scene(scene_path, rx, ry)
+func _stamp_prefab_room(scene_path: String, rx: int, ry: int, rw: int, rh: int, rng: RandomNumberGenerator) -> void:
+	var result = RoomStamper.stamp_from_scene(scene_path, rx, ry)
 
 	for pos in result.cells:
 		if cells.has(pos):
@@ -122,11 +142,11 @@ func _stamp_prefab_room(rx: int, ry: int, rw: int, rh: int, rng: RandomNumberGen
 func _stamp_prefab_corridor(a: Vector2i, b: Vector2i, rng: RandomNumberGenerator) -> void:
 	var scene_path = PrefabRegistry.pick_corridor(rng)
 	var result = RoomStamper.stamp_corridor(scene_path, a, b)
- 
+
 	for pos in result.cells:
 		if cells.has(pos):
 			cells[pos] = result.cells[pos]
- 
+
 	for col in result.columns:
 		if cells.get(col, CELL_WALL) == CELL_FLOOR:
 			columns.append(col)
@@ -150,6 +170,24 @@ func _place_columns(room_x: int, room_y: int, room_w: int, room_h: int, rng: Ran
 				columns.append(Vector2i(cx, cy))
 			cy += COL_SPACING
 		cx += COL_SPACING
+
+# Busca la celda de piso más cercana a un punto, expandiendo en anillos.
+# Necesario porque el centro geométrico de un prefab irregular puede
+# caer sobre una pared en vez de piso.
+func _find_nearest_floor(target: Vector2i) -> Vector2i:
+	if cells.get(target, CELL_WALL) == CELL_FLOOR:
+		return target
+
+	for radius in range(1, 12):
+		for dx in range(-radius, radius + 1):
+			for dy in range(-radius, radius + 1):
+				if maxi(absi(dx), absi(dy)) != radius:
+					continue
+				var p = target + Vector2i(dx, dy)
+				if cells.get(p, CELL_WALL) == CELL_FLOOR:
+					return p
+
+	return target
 
 func _carve_to_nearest(from: Vector2i, centers: Array) -> void:
 	var nearest   = centers[0]

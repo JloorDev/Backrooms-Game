@@ -25,7 +25,20 @@ fill_from = Vector2(0, 1)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fp3wc"]
 size = Vector2(8, 2)
 
+[sub_resource type="OccluderPolygon2D" id="Occluder_player"]
+polygon = PackedVector2Array(-4, 6, 4, 6, 4, 8, -4, 8)
+
 [node name="Player" type="CharacterBody2D" unique_id=771137993]
+
+[node name="ContactShadow" type="Sprite2D" parent="."]
+texture = ExtResource("8_kbsxf")
+modulate = Color(0, 0, 0, 0.35)
+position = Vector2(0, 8)
+scale = Vector2(0.15, 0.08)
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="."]
+position = Vector2(0, 7)
+occluder = SubResource("Occluder_player")
 
 [node name="Sprite" type="Sprite2D" parent="." unique_id=435634803]
 scale = Vector2(0.5, 0.5)
@@ -71,4 +84,7 @@ script = ExtResource("6_g2jcq")
 color = Color(0.92156863, 0.8, 0.49019608, 1)
 energy = 0.45
 texture = ExtResource("8_kbsxf")
-texture_scale = 12.0
+texture_scale = 0.7
+shadow_enabled = true
+shadow_color = Color(0.05, 0.04, 0.02, 0.6)
+shadow_filter = 0

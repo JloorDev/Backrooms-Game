@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Test"
+config/name="Backrooms"
 run/main_scene="uid://danks87irmxh8"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"

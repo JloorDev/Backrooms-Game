@@ -1,12 +1,7 @@
 extends CanvasModulate
 
-# ─────────────────────────────────────────
-#  Luz ambiental del Level 0 con parpadeo
-#  fluorescente ocasional
-# ─────────────────────────────────────────
-
-const BASE_COLOR    = Color(0.3, 0.25, 0.14, 1.0)
-const FLICKER_COLOR = Color(0.22, 0.18, 0.09, 1.0)  # más oscuro al parpadear
+const BASE_COLOR    = Color(0.42, 0.35, 0.20, 1.0)
+const FLICKER_COLOR = Color(0.30, 0.24, 0.12, 1.0)
 
 var _timer: float       = 0.0
 var _next_flicker: float = 0.0

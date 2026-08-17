@@ -80,3 +80,20 @@ static func _get_name(v) -> String:
 	if v is Dictionary:
 		return v["v"]
 	return v
+
+static func get_all_room_paths() -> Array:
+	var paths: Array = []
+	for type in ROOMS:
+		for v in type["variations"]:
+			paths.append("res://prefabs/rooms/%s/variation_%s.tscn" % [type["name"], _get_name(v)])
+	return paths
+
+static func get_all_corridor_paths() -> Array:
+	var paths: Array = []
+	for type in CORRIDORS:
+		for v in type["variations"]:
+			paths.append("res://prefabs/corridors/%s/variation_%s.tscn" % [type["name"], _get_name(v)])
+	return paths
+
+static func get_all_paths() -> Array:
+	return get_all_room_paths() + get_all_corridor_paths()

@@ -1,7 +1,7 @@
 extends CanvasModulate
 
-const BASE_COLOR    = Color(0.42, 0.35, 0.20, 1.0)
-const FLICKER_COLOR = Color(0.30, 0.24, 0.12, 1.0)
+const BASE_COLOR    = Color(0.22, 0.18, 0.10, 1.0)
+const FLICKER_COLOR = Color(0.15, 0.12, 0.06, 1.0)
 
 var _timer: float       = 0.0
 var _next_flicker: float = 0.0
@@ -19,20 +19,17 @@ func _process(delta: float) -> void:
 	if _in_flicker:
 		_flicker_elapsed += delta
 
-		# Parpadeo rápido e irregular
 		if fmod(_flicker_elapsed, 0.08) < 0.04:
 			color = FLICKER_COLOR
 		else:
 			color = BASE_COLOR
 
-		# Termina el parpadeo
 		if _flicker_elapsed >= _flicker_duration:
 			_in_flicker = false
 			color = BASE_COLOR
 			_next_flicker = _timer + randf_range(5.0, 15.0)
 
 	elif _timer >= _next_flicker:
-		# Inicia un nuevo parpadeo
 		_in_flicker = true
 		_flicker_elapsed = 0.0
-		_flicker_duration = randf_range(0.1, 0.4)  # corto e inesperado
+		_flicker_duration = randf_range(0.1, 0.4)

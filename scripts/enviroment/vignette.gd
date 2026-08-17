@@ -1,8 +1,8 @@
 extends Node
 
 @export var vignette_shader: Shader = preload("res://shaders/vignette.gdshader")
-@export var strength: float = 0.6
-@export var radius: float = 0.75
+@export var strength: float = 1.0
+@export var radius: float = 0.6
 @export var vignette_color: Color = Color(0.05, 0.04, 0.01, 1.0)
 
 func _ready() -> void:

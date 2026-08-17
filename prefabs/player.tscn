@@ -80,11 +80,9 @@ script = ExtResource("6_g2jcq")
 
 [node name="HUD" parent="." unique_id=1040680160 instance=ExtResource("7_u51tk")]
 
-[node name="PointLight2D" type="PointLight2D" parent="." unique_id=507655505]
+[node name="PointLight2D" type="PointLight2D" parent="."]
 color = Color(0.92156863, 0.8, 0.49019608, 1)
-energy = 0.45
+energy = 0.30
 texture = ExtResource("8_kbsxf")
 texture_scale = 0.7
-shadow_enabled = true
-shadow_color = Color(0.05, 0.04, 0.02, 0.6)
-shadow_filter = 0
+shadow_enabled = false

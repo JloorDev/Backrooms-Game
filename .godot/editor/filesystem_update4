@@ -1,12 +1,7 @@
 res://scenes/main.tscn
 res://resources/tilemap.tres
 res://resources/items/consumables/almond_water.tres
-res://scripts/world/chunk.gd
-res://prefabs/player.tscn
-res://prefabs/world/ceiling_light.tscn
-res://scripts/world/room_stamper.gd
-res://scripts/world/prefab_registry.gd
-res://scripts/world/world.gd
-res://scripts/enviroment/room_ambient.gd
+res://shaders/vignette.gdshader
 res://shaders/pixelate.gdshader
-res://scripts/enviroment/pixelate.gd
+res://scenes/main.gd
+res://scripts/world/wall_transparency.gd

@@ -3,19 +3,19 @@
 [ext_resource type="Texture2D" uid="uid://c4m1t7c54papf" path="res://sprites/wall.png" id="1_tex"]
 
 [sub_resource type="OccluderPolygon2D" id="Occluder_wall"]
-polygon = PackedVector2Array(-8, -7, 8, -7, 8, -4, 1, 0, -1, 0, -8, -4)
+polygon = PackedVector2Array(-1, -7, 1, -7, 8, -4, 1, 0, -1, 0, -8, -4)
 
 [node name="Wall" type="StaticBody2D" unique_id=1483134269]
 y_sort_enabled = true
 
 [node name="Sprite" type="Sprite2D" parent="." unique_id=1248830736]
 texture = ExtResource("1_tex")
-centered = false
-offset = Vector2(-8, -24)
+offset = Vector2(0, -10)
+region_rect = Rect2(0, 21, 16, 7)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=1210071644]
 position = Vector2(0, 4)
-polygon = PackedVector2Array(-8, -7, 8, -7, 8, -4, 1, 0, -1, 0, -8, -4)
+polygon = PackedVector2Array(-1, -7, 1, -7, 8, -4, 1, 0, -1, 0, -8, -4)
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="." unique_id=1388239189]
 position = Vector2(0, 4)

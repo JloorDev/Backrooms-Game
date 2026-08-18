@@ -12,7 +12,6 @@
 script = ExtResource("1_rhhhf")
 
 [node name="YSortRoot" type="Node2D" parent="." unique_id=1033155383]
-y_sort_enabled = true
 
 [node name="GroundLayer" type="TileMapLayer" parent="YSortRoot" unique_id=1070753230]
 y_sort_enabled = true
@@ -20,21 +19,17 @@ tile_map_data = PackedByteArray("AAD2/wAAAAAAAAAAAAD2/wEAAAAAAAAAAAD2/wIAAAAAAAA
 tile_set = ExtResource("2_qjcqe")
 
 [node name="WallsLayer" type="TileMapLayer" parent="YSortRoot" unique_id=78697394]
-z_index = 1
 y_sort_enabled = true
 position = Vector2(0, 4)
 tile_map_data = PackedByteArray("AAD4//v/AQAAAAAAAgD5/wQAAQAAAAAAAgD8//v/AQAAAAAAAgDw//j/AQAAAAAAAQDw//n/AQAAAAAAAQDw//r/AQAAAAAAAQDw//v/AQAAAAAAAQDx//v/AQAAAAAAAQDx//z/AQAAAAAAAQDx//3/AQAAAAAAAQDx//7/AQAAAAAAAQDx////AQAAAAAAAQDx/wAAAQAAAAAAAQDx/wEAAQAAAAAAAQDy/wEAAQAAAAAAAQDy/wIAAQAAAAAAAQDy/wMAAQAAAAAAAQDy/wQAAQAAAAAAAQDy/wUAAQAAAAAAAQDz/wUAAQAAAAAAAQA=")
 tile_set = ExtResource("2_qjcqe")
 
 [node name="LightsLayer" type="TileMapLayer" parent="YSortRoot" unique_id=670988137]
-z_index = 1
 y_sort_enabled = true
-position = Vector2(0, 4)
-tile_map_data = PackedByteArray("AAD0//3/AQAAAAAAAwA=")
+tile_map_data = PackedByteArray("AAD0//3/AQAAAAAAAwDq/wAAAQAAAAAAAwALAP//AQAAAAAAAwA=")
 tile_set = ExtResource("2_qjcqe")
 
 [node name="Player" parent="YSortRoot" unique_id=771137993 instance=ExtResource("3_jv3i5")]
-z_index = 2
 y_sort_enabled = true
 script = ExtResource("4_ll25s")
 
@@ -48,3 +43,4 @@ script = ExtResource("6_om4r1")
 
 [node name="Vignette" type="Node" parent="." unique_id=389676535]
 script = ExtResource("7_171oe")
+strength = 0.65

@@ -5,10 +5,9 @@
 
 [node name="CeilingLight" type="PointLight2D" unique_id=790122736]
 color = Color(0.92156863, 0.8, 0.49019608, 1)
-energy = 0.85
 shadow_enabled = true
 shadow_color = Color(0.05, 0.04, 0.02, 0.5)
 shadow_filter = 1
 texture = ExtResource("2_tex")
-texture_scale = 1.2
+texture_scale = 2.2
 script = ExtResource("1_script")

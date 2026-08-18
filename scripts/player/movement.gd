@@ -12,17 +12,13 @@ var state: State = State.IDLE
 var is_crouching: bool = false
 
 @onready var sprite: Sprite2D = $Sprite
-@onready var col: CollisionShape2D = $CollisionShape2D
+@onready var col: CollisionPolygon2D = $CollisionPolygon2D
 @onready var stats:  StatsManager = $StatsManager
 @onready var psm: Node = $PlayerStateManager
-
-const SHAPE_STAND  := Vector2(10, 6)
-const SHAPE_CROUCH := Vector2(10, 4)
 
 var _sanity_effects: SanityEffects = null
 
 func _ready() -> void:
-	_set_collision_size(SHAPE_STAND)
 	stats.set_inventory($InventoryManager)
 	$HUD.init(stats, $InventoryManager, psm)
 
@@ -43,7 +39,6 @@ func _physics_process(delta: float) -> void:
 	var dir: Vector2 = _get_input_dir()
 	_update_state(dir)
 	_apply_movement(delta, dir)
-	_update_collision_shape()
 	
 	stats.set_movement_state(state)
 	move_and_slide()
@@ -90,16 +85,6 @@ func _apply_movement(delta: float, dir: Vector2) -> void:
 			sprite.flip_h = dir.x < 0
 	else:
 		velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
-
-func _update_collision_shape() -> void:
-	if is_crouching:
-		_set_collision_size(SHAPE_CROUCH)
-	else:
-		_set_collision_size(SHAPE_STAND)
-
-func _set_collision_size(size: Vector2) -> void:
-	if col.shape is RectangleShape2D:
-		(col.shape as RectangleShape2D).size = size
 
 func _get_input_dir() -> Vector2:
 	var dir = Input.get_vector("move_left", "move_right", "move_up", "move_down")

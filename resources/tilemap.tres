@@ -1,7 +1,7 @@
 [gd_resource type="TileSet" format=3 uid="uid://ckdlnxkh7orkj"]
 
 [ext_resource type="Texture2D" uid="uid://71py5l0llk2h" path="res://sprites/floor.png" id="1_q3qn3"]
-[ext_resource type="PackedScene" uid="uid://wall" path="res://prefabs/world/wall.tscn" id="2_t41nh"]
+[ext_resource type="PackedScene" uid="uid://cr8pj4j0hkvej" path="res://prefabs/world/wall.tscn" id="2_t41nh"]
 [ext_resource type="PackedScene" uid="uid://btsd82bad5mpi" path="res://prefabs/world/ceiling_light.tscn" id="3_iyhun"]
 [ext_resource type="PackedScene" uid="uid://column" path="res://prefabs/world/column.tscn" id="4_y71pg"]
 

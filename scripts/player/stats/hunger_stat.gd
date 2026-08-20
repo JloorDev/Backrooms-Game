@@ -27,6 +27,9 @@ func get_percent() -> float:
 	return current / max_hunger
 
 func get_carry_multiplier() -> float:
+	var pct: float = get_percent()
+	if pct > 0.90:
+		return 1.15
 	match tier:
 		HungerTier.SATIATED : return 1.00
 		HungerTier.HUNGRY   : return 0.75

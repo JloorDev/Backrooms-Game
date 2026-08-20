@@ -54,7 +54,7 @@ const STATE_PENALTIES: Dictionary = {
 	PlayerState.ANXIOUS:      {"sanity_drain": 0.02},
 	PlayerState.DISTRESSED:   {"speed": -0.05, "sanity_drain": 0.04, "stamina_drain": 1.1},
 	PlayerState.PANICKING:    {"speed": -0.15, "sanity_drain": 0.08, "stamina_drain": 1.3, "input_noise": 0.3},
-	PlayerState.WINDED:       {"speed": -0.10, "can_run": false, "can_jog": false},
+	PlayerState.WINDED:       {"speed": -0.10, "can_run": false},
 	PlayerState.OVERLOADED:   {"speed": -0.30, "stamina_drain": 1.8},
 }
 
@@ -185,9 +185,6 @@ func _compute_penalties() -> void:
 		if p.has("can_jog") and not p["can_jog"]:
 			_can_jog = false
 
-# ─────────────────────────────────────────
-#  API para otros sistemas
-# ─────────────────────────────────────────
 func get_speed_multiplier() -> float:
 	return clampf(1.0 + _speed_penalty, 0.2, 1.5)
 
@@ -207,10 +204,10 @@ func get_input_noise_mult() -> float:
 	return _input_noise_mult
 
 func can_run() -> bool:
-	return _can_run and stats.stamina > stats.max_stamina * 0.40
+	return _can_run and stats.can_run()
 
 func can_jog() -> bool:
-	return _can_jog and stats.stamina > stats.max_stamina * 0.20
+	return _can_jog and stats.can_jog()
 
 func has_state(s: PlayerState) -> bool:
 	return s in _active_states

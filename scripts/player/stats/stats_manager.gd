@@ -10,13 +10,17 @@ enum SanityEvent { GHOST_SOUND, LIGHT_FLICKER, HALLUCINATION }
 
 @export var max_stamina:            float = 100.0
 @export var max_health:             float = 100.0
-@export var stamina_drain_jog:      float = 1.2   # trotar drena poco
-@export var stamina_drain_run:      float = 3.5   # correr drena más
+@export var stamina_drain_jog:      float = 1.2   # jogging drains stamina slowly
+@export var stamina_drain_run:      float = 3.5   # sprinting drains stamina fast
 @export var stamina_drain_thirst:   float = 0.65
 @export var stamina_regen:          float = 2.5
 @export var health_drain_thirst:    float = 0.25
 @export var overload_speed_penalty: float = 0.30
 @export var overload_stamina_mult:  float = 2.0
+
+## Minimum stamina % required to start or keep running.
+## Dropping below this locks out sprinting until stamina refills to 100%.
+@export var run_threshold: float = 0.40
 
 @onready var hunger:  HungerStat  = $HungerStat
 @onready var thirst:  ThirstStat  = $ThirstStat
@@ -31,6 +35,9 @@ var _movement_state: int              = 0
 var _inventory:      InventoryManager = null
 var _sanity_effects: SanityEffects    = null
 
+var _run_locked: bool = false
+var _fully_exhausted: bool = false
+
 func _ready() -> void:
 	stamina = max_stamina
 	health  = max_health
@@ -44,12 +51,14 @@ func _physics_process(delta: float) -> void:
 
 	hunger.drain(delta, is_running)
 	thirst.drain(delta, is_running or is_jogging)
+
+	_update_light_exposure()
 	sanity.drain_passive(delta)
 
-	# Hambre/sed/fatiga afectan cordura
+	# Hunger/thirst/fatigue drain sanity too
 	_update_sanity_from_needs(delta)
 
-	# Pasar porcentajes a fatiga
+	# Pass percentages down to fatigue
 	fatigue.set_hunger_percent(hunger.get_percent())
 	fatigue.set_thirst_percent(thirst.get_percent())
 	fatigue.drain(delta, _movement_state)
@@ -63,13 +72,11 @@ func set_movement_state(state: int) -> void:
 func set_sanity_effects(effects: SanityEffects) -> void:
 	_sanity_effects = effects
 
-# ── Puede trotar — stamina > 20% y fatiga no crítica ─────────
 func can_jog() -> bool:
-	return stamina > max_stamina * 0.20 and fatigue.tier != FatigueStat.FatigueTier.CRITICAL
+	return not _fully_exhausted and stamina > 0.0 and fatigue.tier != FatigueStat.FatigueTier.CRITICAL
 
-# ── Puede correr — stamina > 40% y fatiga no crítica ni exhausted ─
 func can_run() -> bool:
-	return stamina > max_stamina * 0.40 and fatigue.can_sprint()
+	return not _run_locked and not _fully_exhausted and fatigue.can_sprint()
 
 func set_inventory(inv: InventoryManager) -> void:
 	_inventory = inv
@@ -98,7 +105,6 @@ func get_stamina_drain_multiplier() -> float:
 	mult *= fatigue.get_stamina_drain_mult()
 	return mult
 
-# ── Stamina según estado de movimiento ───────────────────────
 func _update_stamina(delta: float, is_jogging: bool, is_running: bool) -> void:
 	if is_running:
 		var drain = stamina_drain_run * get_stamina_drain_multiplier()
@@ -109,11 +115,22 @@ func _update_stamina(delta: float, is_jogging: bool, is_running: bool) -> void:
 	elif not thirst.is_empty():
 		_set_stamina(stamina + stamina_regen * delta)
 
+	var pct: float = stamina / max_stamina
+
+	if stamina <= 0.0:
+		_fully_exhausted = true
+		_run_locked = true
+	elif pct < run_threshold:
+		_run_locked = true
+
+	if pct >= 1.0:
+		_fully_exhausted = false
+		_run_locked = false
+
 func _set_stamina(value: float) -> void:
 	stamina = clampf(value, 0.0, max_stamina)
 	stamina_changed.emit(stamina, stamina / max_stamina)
 
-# ── Hambre/sed/fatiga drenan cordura ─────────────────────────
 func _update_sanity_from_needs(delta: float) -> void:
 	var drain: float = 0.0
 
@@ -132,6 +149,22 @@ func _update_sanity_from_needs(delta: float) -> void:
 
 	if drain > 0.0:
 		sanity.drain_from_needs(drain * delta)
+
+func _update_light_exposure() -> void:
+	var player_pos: Vector2 = get_parent().global_position
+	var in_light: bool = false
+
+	for l in get_tree().get_nodes_in_group("dynamic_lights"):
+		if not (l is PointLight2D) or not l.visible or l.energy <= 0.02:
+			continue
+		var radius = l.get("effective_radius")
+		if radius == null:
+			radius = 46.0
+		if player_pos.distance_to(l.global_position) <= radius:
+			in_light = true
+			break
+
+	sanity.set_in_darkness(not in_light)
 
 func _on_thirst_depleted() -> void:
 	set_process(true)

@@ -10,7 +10,6 @@
 [ext_resource type="Script" uid="uid://c876d6t5n826t" path="res://scripts/player/stats/sanity_effects.gd" id="7_opo22"]
 [ext_resource type="PackedScene" uid="uid://60n0abi25l71" path="res://prefabs/hud.tscn" id="7_u51tk"]
 [ext_resource type="Script" uid="uid://btb2mdwptj1ox" path="res://scripts/player/stats/player_state_manager.gd" id="8_8rb0w"]
-[ext_resource type="Texture2D" uid="uid://bir2m8uobp8xv" path="res://resources/light_texture.tres" id="8_kbsxf"]
 
 [sub_resource type="OccluderPolygon2D" id="Occluder_player"]
 polygon = PackedVector2Array(-4, 6, 4, 6, 4, 8, -4, 8)
@@ -28,14 +27,17 @@ fill_from = Vector2(0, 1)
 [node name="Player" type="CharacterBody2D" unique_id=771137993]
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="." unique_id=1068822054]
+visible = false
+position = Vector2(0, -4)
 occluder = SubResource("Occluder_player")
 
 [node name="Sprite" type="Sprite2D" parent="." unique_id=435634803]
 scale = Vector2(0.5, 0.5)
 texture = SubResource("GradientTexture2D_72ieh")
+offset = Vector2(0, -8)
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=1664291635]
-position = Vector2(0, 8)
+position = Vector2(0, 4)
 polygon = PackedVector2Array(4, -2, 1, 0, -1, 0, -4, -2)
 
 [node name="Camera" type="Camera2D" parent="." unique_id=996857251]
@@ -69,9 +71,3 @@ script = ExtResource("8_8rb0w")
 script = ExtResource("6_g2jcq")
 
 [node name="HUD" parent="." unique_id=1040680160 instance=ExtResource("7_u51tk")]
-
-[node name="PointLight2D" type="PointLight2D" parent="." unique_id=121540243]
-color = Color(0.92156863, 0.8, 0.49019608, 1)
-energy = 0.25
-texture = ExtResource("8_kbsxf")
-texture_scale = 0.7

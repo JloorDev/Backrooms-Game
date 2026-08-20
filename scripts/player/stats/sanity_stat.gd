@@ -11,6 +11,8 @@ enum SanityThreshold { NORMAL, LOW, CRITICAL }
 @export var dark_drain:    float = 0.20
 @export var entity_drain:  float = 0.65
 
+@export var light_restore: float = 0.12
+
 var current:   float           = max_sanity
 var threshold: SanityThreshold = SanityThreshold.NORMAL
 
@@ -21,10 +23,15 @@ func _ready() -> void:
 	current = max_sanity
 
 func drain_passive(delta: float) -> void:
-	var rate: float = passive_drain
-	if _in_darkness: rate += dark_drain
-	if _near_entity: rate += entity_drain
-	_set_value(current - rate * delta)
+	if _in_darkness:
+		var rate: float = passive_drain + dark_drain
+		if _near_entity: rate += entity_drain
+		_set_value(current - rate * delta)
+	else:
+		var rate: float = 0.0
+		if _near_entity: rate += entity_drain
+		var net: float = light_restore - rate
+		_set_value(current + net * delta)
 
 # Drain separado por hambre/sed/fatiga
 func drain_from_needs(amount: float) -> void:

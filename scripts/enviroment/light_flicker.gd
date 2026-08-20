@@ -1,9 +1,11 @@
 extends PointLight2D
 
-@export var base_energy:   float = 0.20
-@export var off_energy:    float = 0.08
+@export var base_energy:   float = 0.95
+@export var off_energy:    float = 0.65
 
 @export var broken_light_chance: float = 0.18
+
+@export var effective_radius: float = 46.0
 
 var _rng := RandomNumberGenerator.new()
 var _timer: float = 0.0

@@ -10,22 +10,21 @@ enum SanityEvent { GHOST_SOUND, LIGHT_FLICKER, HALLUCINATION }
 
 @export var max_stamina:            float = 100.0
 @export var max_health:             float = 100.0
-@export var stamina_drain_jog:      float = 1.2   # jogging drains stamina slowly
-@export var stamina_drain_run:      float = 3.5   # sprinting drains stamina fast
+@export var stamina_drain_jog:      float = 1.2
+@export var stamina_drain_run:      float = 3.5
 @export var stamina_drain_thirst:   float = 0.65
 @export var stamina_regen:          float = 2.5
 @export var health_drain_thirst:    float = 0.25
 @export var overload_speed_penalty: float = 0.30
 @export var overload_stamina_mult:  float = 2.0
 
-## Minimum stamina % required to start or keep running.
-## Dropping below this locks out sprinting until stamina refills to 100%.
 @export var run_threshold: float = 0.40
 
 @onready var hunger:  HungerStat  = $HungerStat
 @onready var thirst:  ThirstStat  = $ThirstStat
 @onready var sanity:  SanityStat  = $SanityStat
 @onready var fatigue: FatigueStat = $FatigueStat
+@onready var psm: PlayerStateManager = get_parent().get_node("PlayerStateManager")
 
 var stamina:       float = 0.0
 var health:        float = 0.0
@@ -46,8 +45,8 @@ func _ready() -> void:
 	sanity.sanity_changed.connect(_on_sanity_changed_internal)
 
 func _physics_process(delta: float) -> void:
-	var is_jogging: bool = _movement_state == 2  # State.JOG
-	var is_running: bool = _movement_state == 3  # State.RUN
+	var is_jogging: bool = _movement_state == PlayerMovement.State.JOG
+	var is_running: bool = _movement_state == PlayerMovement.State.RUN
 
 	hunger.drain(delta, is_running)
 	thirst.drain(delta, is_running or is_jogging)
@@ -55,8 +54,9 @@ func _physics_process(delta: float) -> void:
 	_update_light_exposure()
 	sanity.drain_passive(delta)
 
-	# Hunger/thirst/fatigue drain sanity too
-	_update_sanity_from_needs(delta)
+	# Hambre/sed/fatiga/cordura ya se combinan en PlayerStateManager --
+	# una sola fuente de verdad, sin recalcular umbrales aquí de nuevo.
+	sanity.drain_from_needs(psm.get_sanity_drain_extra() * delta)
 
 	# Pass percentages down to fatigue
 	fatigue.set_hunger_percent(hunger.get_percent())
@@ -131,25 +131,6 @@ func _set_stamina(value: float) -> void:
 	stamina = clampf(value, 0.0, max_stamina)
 	stamina_changed.emit(stamina, stamina / max_stamina)
 
-func _update_sanity_from_needs(delta: float) -> void:
-	var drain: float = 0.0
-
-	match hunger.tier:
-		HungerStat.HungerTier.HUNGRY:
-			drain += 0.03
-		HungerStat.HungerTier.STARVING:
-			drain += 0.12
-
-	var thirst_pct = thirst.get_percent()
-	if thirst_pct < 0.50:
-		drain += lerp(0.0, 0.18, (0.50 - thirst_pct) / 0.50)
-
-	if fatigue.tier == FatigueStat.FatigueTier.CRITICAL:
-		drain += 0.08
-
-	if drain > 0.0:
-		sanity.drain_from_needs(drain * delta)
-
 func _update_light_exposure() -> void:
 	var player_pos: Vector2 = get_parent().global_position
 	var in_light: bool = false
@@ -185,7 +166,7 @@ func _set_health(value: float) -> void:
 func _update_overload() -> void:
 	if _inventory == null:
 		return
-	var capacity = _inventory.get_max_weight() * hunger.get_carry_multiplier()
+	var capacity = _inventory.get_max_weight() * psm.get_carry_multiplier()
 	var new_overloaded = _inventory.get_current_weight() > capacity
 	if new_overloaded != is_overloaded:
 		is_overloaded = new_overloaded

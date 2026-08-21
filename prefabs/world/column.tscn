@@ -2,9 +2,8 @@
 
 [ext_resource type="Shader" uid="uid://6nhlsqlgm7ux" path="res://shaders/facing.gdshader" id="1_je7n1"]
 [ext_resource type="Texture2D" uid="uid://tpfotypceu6k" path="res://sprites/column.png" id="1_tex"]
-[ext_resource type="Script" uid="uid://dq6v7pkfel6l5" path="res://scripts/enviroment/shadow_caster.gd" id="2_44tlf"]
 [ext_resource type="Texture2D" uid="uid://cyfap3bfjbqt5" path="res://sprites/column_normalmap.png" id="2_45j4t"]
-[ext_resource type="Script" uid="uid://b6vavuc4ogxo5" path="res://scripts/enviroment/occluder_fade.gd" id="3_yk8cy"]
+[ext_resource type="Script" uid="uid://b6vavuc4ogxo5" path="res://scripts/environment/occluder_fade.gd" id="3_yk8cy"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_8eh7g"]
 shader = ExtResource("1_je7n1")
@@ -19,6 +18,9 @@ normal_texture = ExtResource("2_45j4t")
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_44tlf"]
 size = Vector2(8, 32)
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_column"]
+polygon = PackedVector2Array(-4, -6, 4, -6, 4, -2, 1, 0, -1, 0, -4, -2)
+
 [node name="Column" type="StaticBody2D" unique_id=1397702706]
 y_sort_enabled = true
 
@@ -31,12 +33,13 @@ offset = Vector2(0, -12)
 position = Vector2(0, 4)
 polygon = PackedVector2Array(-4, -6, 4, -6, 4, -2, 1, 0, -1, 0, -4, -2)
 
-[node name="ShadowCaster" type="Node2D" parent="." unique_id=859439917]
-script = ExtResource("2_44tlf")
-
 [node name="OcclusionZone" type="Area2D" parent="." unique_id=6552234]
 script = ExtResource("3_yk8cy")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OcclusionZone" unique_id=599387951]
 position = Vector2(0, -12)
 shape = SubResource("RectangleShape2D_44tlf")
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="." unique_id=1264367430]
+position = Vector2(0, 4)
+occluder = SubResource("OccluderPolygon2D_column")

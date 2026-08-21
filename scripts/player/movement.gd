@@ -1,4 +1,5 @@
 extends CharacterBody2D
+class_name PlayerMovement
 
 const WALK_SPEED:   float = 45.0
 const JOG_SPEED:    float = 65.0

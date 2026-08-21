@@ -3,7 +3,7 @@
 [ext_resource type="Shader" uid="uid://6nhlsqlgm7ux" path="res://shaders/facing.gdshader" id="1_llaaa"]
 [ext_resource type="Texture2D" uid="uid://c4m1t7c54papf" path="res://sprites/wall.png" id="1_tex"]
 [ext_resource type="Texture2D" uid="uid://d3101pc25kr6u" path="res://sprites/wall_normalmap.png" id="2_81gt6"]
-[ext_resource type="Script" uid="uid://b6vavuc4ogxo5" path="res://scripts/enviroment/occluder_fade.gd" id="2_g1qa0"]
+[ext_resource type="Script" uid="uid://b6vavuc4ogxo5" path="res://scripts/environment/occluder_fade.gd" id="2_g1qa0"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1j55h"]
 shader = ExtResource("1_llaaa")
@@ -18,10 +18,14 @@ normal_texture = ExtResource("2_81gt6")
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_81gt6"]
 size = Vector2(16, 28)
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_wall"]
+polygon = PackedVector2Array(-1, -7, 1, -7, 8, -4, 1, 0, -1, 0, -8, -4)
+
 [node name="Wall" type="StaticBody2D" unique_id=1483134269]
 y_sort_enabled = true
 
 [node name="Sprite" type="Sprite2D" parent="." unique_id=1248830736]
+light_mask = 3
 material = SubResource("ShaderMaterial_1j55h")
 texture = SubResource("CanvasTexture_g1qa0")
 offset = Vector2(0, -10)
@@ -37,3 +41,7 @@ script = ExtResource("2_g1qa0")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="OcclusionZone" unique_id=1759341840]
 position = Vector2(0, -10)
 shape = SubResource("RectangleShape2D_81gt6")
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="." unique_id=144345200]
+position = Vector2(0, 4)
+occluder = SubResource("OccluderPolygon2D_wall")

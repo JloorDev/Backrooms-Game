@@ -32,6 +32,7 @@ position = Vector2(0, -4)
 occluder = SubResource("Occluder_player")
 
 [node name="Sprite" type="Sprite2D" parent="." unique_id=435634803]
+light_mask = 3
 scale = Vector2(0.5, 0.5)
 texture = SubResource("GradientTexture2D_72ieh")
 offset = Vector2(0, -8)

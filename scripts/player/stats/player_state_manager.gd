@@ -3,7 +3,6 @@ class_name PlayerStateManager
 
 signal states_changed(active_states: Array)
 
-# ── ESTADOS POSIBLES ──────────────────────────────────────────
 enum PlayerState {
 	# Hambre
 	FULL,           # > 90% — lleno, leve penalización de velocidad
@@ -40,7 +39,7 @@ enum PlayerState {
 
 # Penalizaciones por estado — se acumulan
 const STATE_PENALTIES: Dictionary = {
-	PlayerState.FULL:         {"speed": -0.05, "stamina_drain": 1.1},
+	PlayerState.FULL:         {"speed": -0.05, "stamina_drain": 1.1, "carry": 0.15},
 	PlayerState.PECKISH:      {},
 	PlayerState.HUNGRY:       {"speed": -0.05, "carry": -0.10, "sanity_drain": 0.03},
 	PlayerState.VERY_HUNGRY:  {"speed": -0.15, "carry": -0.25, "stamina_regen": -0.3, "sanity_drain": 0.08},
@@ -87,14 +86,15 @@ const STATE_NAMES: Dictionary = {
 var _active_states: Array[PlayerState] = []
 var _last_states:   Array[PlayerState] = []
 var _check_timer:   float = 0.0
-const CHECK_INTERVAL: float = 0.5  # revisar cada 0.5s, no cada frame
+const CHECK_INTERVAL: float = 0.5
 
-var _speed_penalty:    float = 0.0
+var _speed_penalty:      float = 0.0
 var _stamina_drain_mult: float = 1.0
 var _stamina_regen_mult: float = 1.0
 var _sanity_drain_extra: float = 0.0
 var _health_drain_extra: float = 0.0
 var _input_noise_mult:   float = 0.0
+var _carry_bonus:        float = 0.0
 var _can_run:  bool = true
 var _can_jog:  bool = true
 
@@ -148,18 +148,13 @@ func _update_states() -> void:
 	if stats.is_overloaded:
 		_active_states.append(PlayerState.OVERLOADED)
 
-	# Computar penalizaciones acumuladas
 	_compute_penalties()
 
-	# Emitir si cambiaron
 	if _active_states != _last_states:
 		_last_states = _active_states.duplicate()
 		states_changed.emit(_active_states)
 		_print_states()
 
-# ─────────────────────────────────────────
-#  Acumular penalizaciones de todos los estados
-# ─────────────────────────────────────────
 func _compute_penalties() -> void:
 	_speed_penalty      = 0.0
 	_stamina_drain_mult = 1.0
@@ -167,6 +162,7 @@ func _compute_penalties() -> void:
 	_sanity_drain_extra = 0.0
 	_health_drain_extra = 0.0
 	_input_noise_mult   = 0.0
+	_carry_bonus        = 0.0
 	_can_run  = true
 	_can_jog  = true
 
@@ -180,6 +176,7 @@ func _compute_penalties() -> void:
 		_sanity_drain_extra += p.get("sanity_drain",   0.0)
 		_health_drain_extra += p.get("health_drain",   0.0)
 		_input_noise_mult   += p.get("input_noise",    0.0)
+		_carry_bonus        += p.get("carry",          0.0)
 		if p.has("can_run") and not p["can_run"]:
 			_can_run = false
 		if p.has("can_jog") and not p["can_jog"]:
@@ -203,6 +200,9 @@ func get_health_drain_extra() -> float:
 func get_input_noise_mult() -> float:
 	return _input_noise_mult
 
+func get_carry_multiplier() -> float:
+	return clampf(1.0 + _carry_bonus, 0.3, 1.3)
+
 func can_run() -> bool:
 	return _can_run and stats.can_run()
 
@@ -215,9 +215,6 @@ func has_state(s: PlayerState) -> bool:
 func get_active_states() -> Array:
 	return _active_states
 
-# ─────────────────────────────────────────
-#  Debug en consola
-# ─────────────────────────────────────────
 func _print_states() -> void:
 	var names: Array = []
 	for s in _active_states:

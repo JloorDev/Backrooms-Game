@@ -18,7 +18,8 @@ script = ExtResource("1_ky1gv")
 data = ExtResource("2_voqqc")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1145013172]
-scale = Vector2(0.045, 16.126)
+position = Vector2(0, -8)
+scale = Vector2(0.045, 16)
 texture = SubResource("GradientTexture1D_ky1gv")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1248610795]

@@ -14,6 +14,7 @@ enum FatigueTier {
 @export var max_fatigue:     float = 100.0
 @export var drain_idle:      float = 0.005   # despierto parado
 @export var drain_walk:      float = 0.010   # caminando
+@export var drain_jog:       float = 0.022   # trotando
 @export var drain_run:       float = 0.035   # corriendo
 @export var drain_crouch:    float = 0.007   # agachado
 @export var regen_rest:      float = 0.08    # descansando (tecla rest)
@@ -24,28 +25,25 @@ var current:     float = max_fatigue
 var tier:        FatigueTier = FatigueTier.RESTED
 var is_resting:  bool  = false
 
-# Multiplicadores de hambre/sed pasados desde StatsManager
 var _hunger_pct: float = 1.0
 var _thirst_pct: float = 1.0
 
 func _ready() -> void:
 	current = max_fatigue
 
-func drain(delta: float, movement_state: int) -> void:
+func drain(delta: float, movement_state: PlayerMovement.State) -> void:
 	if is_resting:
 		_set_value(current + regen_rest * delta)
 		return
 
-	# Tasa base según movimiento (usa los valores del enum State de movement.gd)
-	# 0=IDLE, 1=WALK, 2=RUN, 3=CROUCH
 	var rate: float
 	match movement_state:
-		2: rate = drain_run
-		1: rate = drain_walk
-		3: rate = drain_crouch
-		_: rate = drain_idle
+		PlayerMovement.State.RUN:    rate = drain_run
+		PlayerMovement.State.JOG:    rate = drain_jog
+		PlayerMovement.State.WALK:   rate = drain_walk
+		PlayerMovement.State.CROUCH: rate = drain_crouch
+		_:                           rate = drain_idle
 
-	# Hambre y sed bajos aumentan la fatiga
 	var hunger_factor: float = lerp(hunger_mult, 1.0, _hunger_pct)
 	var thirst_factor: float = lerp(thirst_mult, 1.0, _thirst_pct)
 	rate *= maxf(hunger_factor, thirst_factor)
@@ -61,7 +59,6 @@ func set_thirst_percent(pct: float) -> void:
 func get_percent() -> float:
 	return current / max_fatigue
 
-# Penalización de velocidad según tier (se multiplica en StatsManager)
 func get_speed_penalty() -> float:
 	match tier:
 		FatigueTier.RESTED    : return 1.00
@@ -70,7 +67,6 @@ func get_speed_penalty() -> float:
 		FatigueTier.CRITICAL  : return 0.55
 		_: return 1.00
 
-# Penalización de stamina drain (más cansado = stamina se agota más rápido)
 func get_stamina_drain_mult() -> float:
 	match tier:
 		FatigueTier.RESTED    : return 1.0
@@ -79,7 +75,6 @@ func get_stamina_drain_mult() -> float:
 		FatigueTier.CRITICAL  : return 2.5
 		_: return 1.0
 
-# True si el jugador puede correr (CRITICAL bloquea el sprint)
 func can_sprint() -> bool:
 	return tier != FatigueTier.CRITICAL
 

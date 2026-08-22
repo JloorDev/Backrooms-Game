@@ -6,15 +6,13 @@
 
 [node name="CeilingLight" type="PointLight2D" unique_id=790122736 groups=["dynamic_lights"]]
 color = Color(0.92156863, 0.8, 0.49019608, 1)
-range_layer_max = 1
 shadow_enabled = true
-shadow_color = Color(0.12156863, 0.101960786, 0.078431375, 1)
 shadow_filter = 1
+shadow_filter_smooth = 2.5
 texture = ExtResource("2_tex")
 texture_scale = 1.8
-height = 100.0
+height = 50.0
 script = ExtResource("1_script")
-base_energy = 1.15
 
 [node name="FillLight" type="PointLight2D" parent="." unique_id=1427351629]
 light_mask = 2
@@ -22,4 +20,5 @@ color = Color(0.92156863, 0.8, 0.49019608, 1)
 range_item_cull_mask = 2
 texture = ExtResource("2_tex")
 texture_scale = 1.8
+height = 50.0
 script = ExtResource("3_6kfom")

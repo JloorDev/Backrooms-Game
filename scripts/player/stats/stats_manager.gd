@@ -37,6 +37,9 @@ var _sanity_effects: SanityEffects    = null
 var _run_locked: bool = false
 var _fully_exhausted: bool = false
 
+signal light_exposure_changed(in_light: bool)
+var is_in_light: bool = true
+
 func _ready() -> void:
 	stamina = max_stamina
 	health  = max_health
@@ -144,6 +147,10 @@ func _update_light_exposure() -> void:
 		if player_pos.distance_to(l.global_position) <= radius:
 			in_light = true
 			break
+
+	if in_light != is_in_light:
+		is_in_light = in_light
+		light_exposure_changed.emit(is_in_light)
 
 	sanity.set_in_darkness(not in_light)
 

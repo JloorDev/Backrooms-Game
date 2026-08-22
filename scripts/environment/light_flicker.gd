@@ -1,7 +1,7 @@
 extends PointLight2D
 
-@export var base_energy: float = 0.95
-@export var off_energy:  float = 0.65
+@export var base_energy: float = 1.15
+@export var off_energy:  float = 0.85
 
 @export var broken_light_chance: float = 0.18
 

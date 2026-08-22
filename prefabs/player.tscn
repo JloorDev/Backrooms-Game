@@ -1,8 +1,10 @@
 [gd_scene format=3 uid="uid://bxoag47ttes1x"]
 
+[ext_resource type="Shader" uid="uid://u4l7obx0cjub" path="res://shaders/outline.gdshader" id="1_8rb0w"]
 [ext_resource type="Script" uid="uid://dejn2beb877qe" path="res://scripts/player/camera.gd" id="1_72ieh"]
 [ext_resource type="Script" uid="uid://0f1rngorvpax" path="res://scripts/player/stats/hunger_stat.gd" id="2_4dohe"]
 [ext_resource type="Script" uid="uid://cfxwcmxdncsjr" path="res://scripts/player/stats/stats_manager.gd" id="2_ht1c8"]
+[ext_resource type="Script" uid="uid://bo7akt2k45qfa" path="res://scripts/player/player_outline.gd" id="2_sd3sa"]
 [ext_resource type="Script" uid="uid://dux1yg4e7bd25" path="res://scripts/player/stats/thirst_stat.gd" id="3_1txc5"]
 [ext_resource type="Script" uid="uid://bfnsdlbwr1701" path="res://scripts/player/stats/sanity_stat.gd" id="4_ht1c8"]
 [ext_resource type="Script" uid="uid://b2yn3djee7qt3" path="res://scripts/player/inventory_manager.gd" id="6_g2jcq"]
@@ -10,9 +12,6 @@
 [ext_resource type="Script" uid="uid://c876d6t5n826t" path="res://scripts/player/stats/sanity_effects.gd" id="7_opo22"]
 [ext_resource type="PackedScene" uid="uid://60n0abi25l71" path="res://prefabs/hud.tscn" id="7_u51tk"]
 [ext_resource type="Script" uid="uid://btb2mdwptj1ox" path="res://scripts/player/stats/player_state_manager.gd" id="8_8rb0w"]
-
-[sub_resource type="OccluderPolygon2D" id="Occluder_player"]
-polygon = PackedVector2Array(-4, 6, 4, 6, 4, 8, -4, 8)
 
 [sub_resource type="Gradient" id="Gradient_72ieh"]
 offsets = PackedFloat32Array(1)
@@ -24,18 +23,26 @@ width = 16
 height = 32
 fill_from = Vector2(0, 1)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_sd3sa"]
+shader = ExtResource("1_8rb0w")
+shader_parameter/outline_width = 2.00000007125
+shader_parameter/outline_color = Color(6, 6, 6, 1)
+
 [node name="Player" type="CharacterBody2D" unique_id=771137993]
 
-[node name="LightOccluder2D" type="LightOccluder2D" parent="." unique_id=1068822054]
-visible = false
-position = Vector2(0, -4)
-occluder = SubResource("Occluder_player")
-
 [node name="Sprite" type="Sprite2D" parent="." unique_id=435634803]
-light_mask = 3
+light_mask = 0
 scale = Vector2(0.5, 0.5)
 texture = SubResource("GradientTexture2D_72ieh")
 offset = Vector2(0, -8)
+
+[node name="Outline" type="Sprite2D" parent="." unique_id=542698558]
+light_mask = 0
+material = SubResource("ShaderMaterial_sd3sa")
+scale = Vector2(0.5, 0.5)
+texture = SubResource("GradientTexture2D_72ieh")
+offset = Vector2(0, -8)
+script = ExtResource("2_sd3sa")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=1664291635]
 position = Vector2(0, 4)

@@ -18,13 +18,14 @@ normal_texture = ExtResource("2_45j4t")
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_44tlf"]
 size = Vector2(8, 32)
 
-[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_column"]
-polygon = PackedVector2Array(-4, -6, 4, -6, 4, -2, 1, 0, -1, 0, -4, -2)
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_45j4t"]
+polygon = PackedVector2Array(-1, 0, -1, -1, -3, -1, -3, -2, -4, -2, -4, -3, 4, -3, 4, -2, 3, -2, 3, -1, 1, -1, 1, 0)
 
 [node name="Column" type="StaticBody2D" unique_id=1397702706]
 y_sort_enabled = true
 
 [node name="Sprite" type="Sprite2D" parent="." unique_id=67142993]
+light_mask = 3
 material = SubResource("ShaderMaterial_8eh7g")
 texture = SubResource("CanvasTexture_je7n1")
 offset = Vector2(0, -12)
@@ -42,4 +43,4 @@ shape = SubResource("RectangleShape2D_44tlf")
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="." unique_id=1264367430]
 position = Vector2(0, 4)
-occluder = SubResource("OccluderPolygon2D_column")
+occluder = SubResource("OccluderPolygon2D_45j4t")

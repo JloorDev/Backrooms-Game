@@ -1,7 +1,7 @@
 extends CanvasModulate
 
-const BASE_COLOR    = Color(0.04, 0.035, 0.03, 1.0)
-const FLICKER_COLOR = Color(0.02, 0.018, 0.015, 1.0)
+const BASE_COLOR    = Color(0.05, 0.045, 0.04, 1.0)
+const FLICKER_COLOR = Color(0.025, 0.022, 0.018, 1.0)
 
 var _flicker: FlickerTimer
 

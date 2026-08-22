@@ -3,8 +3,27 @@ shader_type canvas_item;
 uniform bool invert_side = false;
 uniform vec3 outside_tint : source_color = vec3(0.6, 0.65, 0.75);
 uniform float outside_darkness : hint_range(0.0, 0.5) = 0.15;
-
 uniform bool use_room_side = true;
+
+uniform vec2 shadow_point = vec2(9999.0, 9999.0);
+uniform float shadow_radius : hint_range(1.0, 64.0) = 14.0;
+uniform float shadow_strength : hint_range(0.0, 1.0) = 0.0;
+
+varying vec2 local_pos;
+
+void vertex() {
+	local_pos = VERTEX;
+}
+
+void fragment() {
+	vec4 tex_color = texture(TEXTURE, UV);
+
+	float dist = distance(local_pos, shadow_point);
+	float patch = 1.0 - smoothstep(0.0, shadow_radius, dist);
+	float darken = patch * shadow_strength;
+
+	COLOR = vec4(tex_color.rgb * (1.0 - darken), tex_color.a);
+}
 
 void light() {
 	float ndotl = max(dot(NORMAL, LIGHT_DIRECTION), 0.0);

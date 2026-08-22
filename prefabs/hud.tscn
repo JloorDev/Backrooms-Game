@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://d0xolr4vlk04v" path="res://sprites/hud/player.png" id="5_env85"]
 
 [node name="HUD" type="CanvasLayer" unique_id=1040680160]
+visible = false
 script = ExtResource("1_73jnp")
 
 [node name="StatsPanel" type="Panel" parent="." unique_id=1932834618]

@@ -6,7 +6,7 @@ uniform float outside_darkness : hint_range(0.0, 0.5) = 0.15;
 uniform bool use_room_side = true;
 
 uniform vec2 shadow_point = vec2(9999.0, 9999.0);
-uniform float shadow_radius : hint_range(1.0, 64.0) = 14.0;
+uniform vec2 shadow_radius = vec2(9.0, 22.0);
 uniform float shadow_strength : hint_range(0.0, 1.0) = 0.0;
 
 varying vec2 local_pos;
@@ -18,8 +18,9 @@ void vertex() {
 void fragment() {
 	vec4 tex_color = texture(TEXTURE, UV);
 
-	float dist = distance(local_pos, shadow_point);
-	float patch = 1.0 - smoothstep(0.0, shadow_radius, dist);
+	vec2 delta = (local_pos - shadow_point) / max(shadow_radius, vec2(0.01));
+	float dist = length(delta);
+	float patch = 1.0 - smoothstep(0.0, 1.0, dist);
 	float darken = patch * shadow_strength;
 
 	COLOR = vec4(tex_color.rgb * (1.0 - darken), tex_color.a);

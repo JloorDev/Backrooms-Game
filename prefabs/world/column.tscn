@@ -13,7 +13,7 @@ shader_parameter/outside_tint = Color(0.6, 0.65, 0.75, 1)
 shader_parameter/outside_darkness = 0.15
 shader_parameter/use_room_side = true
 shader_parameter/shadow_point = Vector2(9999, 9999)
-shader_parameter/shadow_radius = 14.0
+shader_parameter/shadow_radius = Vector2(9, 22)
 shader_parameter/shadow_strength = 0.0
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_je7n1"]

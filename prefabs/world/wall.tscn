@@ -12,9 +12,9 @@ shader_parameter/invert_side = false
 shader_parameter/outside_tint = Color(0.6, 0.65, 0.75, 1)
 shader_parameter/outside_darkness = 0.15
 shader_parameter/use_room_side = true
-shader_parameter/shadow_point = Vector2(0, -5)
-shader_parameter/shadow_radius = 14.0
-shader_parameter/shadow_strength = 0.6000000285
+shader_parameter/shadow_point = Vector2(0, -10)
+shader_parameter/shadow_radius = Vector2(9, 22)
+shader_parameter/shadow_strength = 0.0
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_g1qa0"]
 diffuse_texture = ExtResource("1_tex")

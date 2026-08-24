@@ -8,10 +8,10 @@ enum SanityThreshold { NORMAL, LOW, CRITICAL }
 
 @export var max_sanity:    float = 100.0
 @export var passive_drain: float = 0.25
-@export var dark_drain:    float = 0.20
+@export var dark_drain:    float = 0.12
 @export var entity_drain:  float = 0.65
 
-@export var light_restore: float = 0.12
+@export var light_restore: float = 0.22
 
 var current:   float           = max_sanity
 var threshold: SanityThreshold = SanityThreshold.NORMAL

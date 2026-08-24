@@ -93,17 +93,7 @@ func _get_shadow_direction(light: PointLight2D) -> Vector2:
 	return to_object.normalized()
 
 func _find_nearest_light() -> PointLight2D:
-	var lights := get_tree().get_nodes_in_group("dynamic_lights")
-	var nearest: PointLight2D = null
-	var nearest_dist: float = INF
-	for l in lights:
-		if not (l is PointLight2D) or not l.visible or l.energy <= 0.01:
-			continue
-		var d: float = global_position.distance_squared_to(l.global_position)
-		if d < nearest_dist:
-			nearest_dist = d
-			nearest = l
-	return nearest
+	return LightUtils.find_nearest(global_position)
 
 func _get_light_energy_ratio(light: PointLight2D) -> float:
 	var base = light.get("base_energy")

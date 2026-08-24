@@ -26,6 +26,9 @@ enum SanityEvent { GHOST_SOUND, LIGHT_FLICKER, HALLUCINATION }
 @onready var fatigue: FatigueStat = $FatigueStat
 @onready var psm: PlayerStateManager = get_parent().get_node("PlayerStateManager")
 
+signal light_exposure_changed(in_light: bool)
+var is_in_light: bool = true
+
 var stamina:       float = 0.0
 var health:        float = 0.0
 var is_overloaded: bool  = false
@@ -36,9 +39,6 @@ var _sanity_effects: SanityEffects    = null
 
 var _run_locked: bool = false
 var _fully_exhausted: bool = false
-
-signal light_exposure_changed(in_light: bool)
-var is_in_light: bool = true
 
 func _ready() -> void:
 	stamina = max_stamina
@@ -57,11 +57,8 @@ func _physics_process(delta: float) -> void:
 	_update_light_exposure()
 	sanity.drain_passive(delta)
 
-	# Hambre/sed/fatiga/cordura ya se combinan en PlayerStateManager --
-	# una sola fuente de verdad, sin recalcular umbrales aquí de nuevo.
 	sanity.drain_from_needs(psm.get_sanity_drain_extra() * delta)
 
-	# Pass percentages down to fatigue
 	fatigue.set_hunger_percent(hunger.get_percent())
 	fatigue.set_thirst_percent(thirst.get_percent())
 	fatigue.drain(delta, _movement_state)
@@ -134,19 +131,10 @@ func _set_stamina(value: float) -> void:
 	stamina = clampf(value, 0.0, max_stamina)
 	stamina_changed.emit(stamina, stamina / max_stamina)
 
+## Ahora usa LightUtils en vez de escanear el grupo "dynamic_lights" a mano.
 func _update_light_exposure() -> void:
 	var player_pos: Vector2 = get_parent().global_position
-	var in_light: bool = false
-
-	for l in get_tree().get_nodes_in_group("dynamic_lights"):
-		if not (l is PointLight2D) or not l.visible or l.energy <= 0.02:
-			continue
-		var radius = l.get("effective_radius")
-		if radius == null:
-			radius = 46.0
-		if player_pos.distance_to(l.global_position) <= radius:
-			in_light = true
-			break
+	var in_light: bool = LightUtils.is_position_lit(player_pos)
 
 	if in_light != is_in_light:
 		is_in_light = in_light

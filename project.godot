@@ -94,3 +94,5 @@ rendering_device/driver.windows="d3d12"
 viewport/transparent_background=true
 2d/snap/snap_2d_transforms_to_pixel=true
 2d/snap/snap_2d_vertices_to_pixel=true
+2d/sdf/oversize=0
+2d/sdf/scale=0

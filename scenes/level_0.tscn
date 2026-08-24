@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bay00qqgb7msg" path="res://scenes/level_0.gd" id="1_rhhhf"]
 [ext_resource type="TileSet" uid="uid://ckdlnxkh7orkj" path="res://resources/tilemap.tres" id="2_qjcqe"]
 [ext_resource type="PackedScene" uid="uid://bxoag47ttes1x" path="res://prefabs/player.tscn" id="3_jv3i5"]
-[ext_resource type="PackedScene" uid="uid://4ktmtsbcexmu" path="res://prefabs/world/dust_motes.tscn" id="3_rhhhf"]
+[ext_resource type="PackedScene" uid="uid://d176rbf8r1pj7" path="res://prefabs/world/dust_motes.tscn" id="3_rhhhf"]
 [ext_resource type="Script" uid="uid://bqrgsh0o85ocx" path="res://scripts/player/movement.gd" id="4_ll25s"]
 [ext_resource type="Script" uid="uid://6byeo4fkbnjv" path="res://scripts/world/item_spawner.gd" id="5_sk60w"]
 [ext_resource type="Script" uid="uid://mhjqy1td0p1a" path="res://scripts/environment/room_ambient.gd" id="6_om4r1"]
@@ -32,7 +32,7 @@ y_sort_enabled = true
 tile_map_data = PackedByteArray("AAD//wAAAQAAAAAAAwA=")
 tile_set = ExtResource("2_qjcqe")
 
-[node name="DustMotes" parent="YSortRoot/LightsLayer" unique_id=77556349 instance=ExtResource("3_rhhhf")]
+[node name="DustMotes" parent="YSortRoot/LightsLayer" unique_id=1733245948 instance=ExtResource("3_rhhhf")]
 
 [node name="Player" parent="YSortRoot" unique_id=771137993 groups=["player"] instance=ExtResource("3_jv3i5")]
 z_index = 2

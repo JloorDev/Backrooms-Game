@@ -19,16 +19,17 @@ initial_velocity_max = 4.0
 angular_velocity_min = -10.0
 angular_velocity_max = 10.0
 gravity = Vector3(0, 1, 0)
-scale_min = 0.6
-scale_max = 1.4
+scale_min = 0.25
+scale_max = 0.5
 color = Color(0.95, 0.9, 0.75, 0.5)
 color_ramp = SubResource("GradientTexture1D_fade")
 
-[node name="DustMotes" type="GPUParticles2D" unique_id=685676734]
+[node name="DustMotes" type="GPUParticles2D" unique_id=508283112]
 z_index = 5
-amount = 60
+amount = 200
 texture = ExtResource("1_dust")
 lifetime = 10.0
 preprocess = 5.0
 randomness = 1.0
+visibility_rect = Rect2(-90, -60, 180, 120)
 process_material = SubResource("ParticleProcessMaterial_dust")

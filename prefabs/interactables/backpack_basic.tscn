@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://ddkbyckhyr3nt"]
+
+[ext_resource type="Script" uid="uid://dh84be8ldhghj" path="res://scripts/items/equipment/bag_pickup.gd" id="1_mwoma"]
+[ext_resource type="Resource" uid="uid://bxj8vihayn3qn" path="res://resources/items/consumables/backpack_basic.tres" id="2_lh2rb"]
+[ext_resource type="Texture2D" uid="uid://bp1c542ycb28i" path="res://sprites/hud/inventory.png" id="3_h2178"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_voqqc"]
+radius = 11.0
+
+[node name="BackpackBasic" type="Area2D" unique_id=1858868849]
+script = ExtResource("1_mwoma")
+data = ExtResource("2_lh2rb")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1145013172]
+texture = ExtResource("3_h2178")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1248610795]
+shape = SubResource("CircleShape2D_voqqc")
+
+[node name="InteractPrompt" type="Label" parent="." unique_id=1894028121]
+offset_right = 40.0
+offset_bottom = 23.0

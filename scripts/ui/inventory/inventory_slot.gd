@@ -8,9 +8,9 @@ signal slot_context_requested(index:int, global_pos:Vector2)
 @onready var quantity_label:Label = $QuantityLabel
 
 var slot_index:int = -1
-var _inventory:InventoryManager = null
+var _inventory = null
 
-func init(index:int, inventory:InventoryManager) -> void:
+func init(index:int, inventory) -> void:
 	slot_index = index
 	_inventory = inventory
 	refresh()
@@ -34,7 +34,7 @@ func _gui_input(event:InputEvent) -> void:
 		MOUSE_BUTTON_RIGHT:
 			var slot = _inventory.get_slot(slot_index)
 			if slot != null:
-				slot_context_requested.emit(slot_index, get_global_mouse_position())  # ← faltaba
+				slot_context_requested.emit(slot_index, get_global_mouse_position())
 
 func _get_drag_data(_pos:Vector2) -> Variant:
 	var slot = _inventory.get_slot(slot_index)

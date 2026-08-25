@@ -21,6 +21,7 @@ class_name HUD
 @onready var weight_label:    Label         = $InventoryPanel/WeightLabel
 @onready var item_name_label: Label         = $InventoryPanel/ItemInfoPanel/ItemNameLabel
 @onready var item_desc_label: Label         = $InventoryPanel/ItemInfoPanel/ItemDescLabel
+@onready var item_stats_label: Label        = $InventoryPanel/ItemInfoPanel/ItemStatsLabel
 @onready var use_button:      Button        = $InventoryPanel/ItemInfoPanel/UseButton
 @onready var context_menu:    Panel         = $InventoryPanel/ContextMenu
 @onready var ctx_use:         Button        = $InventoryPanel/ContextMenu/VBoxContainer/UseButton
@@ -52,11 +53,18 @@ var _context_slot: int = -1
 
 const SLOT_SCENE = preload("res://prefabs/ui/inventory_slot.tscn")
 
-func init(stats: StatsManager, inventory: InventoryManager, psm: PlayerStateManager = null) -> void:
+@onready var hotbar_container: HBoxContainer = $Hotbar
+
+var _hotbar: HotbarManager = null
+var _hotbar_slot_nodes: Array[InventorySlot] = []
+
+func init(stats: StatsManager, inventory: InventoryManager, psm: PlayerStateManager = null, hotbar: HotbarManager = null) -> void:
 	_stats     = stats
 	_inventory = inventory
 	_psm       = psm
+	_hotbar    = hotbar
 	_build_grid()
+	_build_hotbar()
 	_connect_signals()
 	_refresh_all()
 
@@ -167,6 +175,8 @@ func _connect_signals() -> void:
 	btn_player.pressed.connect(_toggle_player_panel)
 	if _psm:
 		_psm.states_changed.connect(_on_states_changed)
+	if _hotbar:
+		_hotbar.hotbar_changed.connect(_refresh_hotbar)
 
 func _refresh_all() -> void:
 	_target["health"]  = (_stats.health  / _stats.max_health)  * 100.0
@@ -205,6 +215,28 @@ func _refresh_states_panel(active_states: Array) -> void:
 			label.add_theme_color_override("font_color", Color(0.4, 0.85, 0.4))
 		label.add_theme_font_size_override("font_size", 13)
 		states_container.add_child(label)
+
+func _build_hotbar() -> void:
+	if _hotbar == null:
+		return
+	for child in hotbar_container.get_children():
+		child.queue_free()
+	_hotbar_slot_nodes.clear()
+	for i in _hotbar.slots.size():
+		var slot_node: InventorySlot = SLOT_SCENE.instantiate()
+		hotbar_container.add_child(slot_node)
+		slot_node.init(i, _hotbar)
+		_hotbar_slot_nodes.append(slot_node)
+
+func _refresh_hotbar() -> void:
+	if _hotbar == null:
+		return
+	# El numero de slots puede crecer/encogerse (mochila puesta/quitada)
+	if _hotbar_slot_nodes.size() != _hotbar.slots.size():
+		_build_hotbar()
+		return
+	for slot_node in _hotbar_slot_nodes:
+		slot_node.refresh()
 
 func _build_grid() -> void:
 	for child in grid.get_children():
@@ -245,10 +277,13 @@ func _refresh_item_info() -> void:
 	if slot == null:
 		item_name_label.text = ""
 		item_desc_label.text = ""
+		item_stats_label.text = ""
 		use_button.visible   = false
 		return
 	item_name_label.text = slot.data.display_name
 	item_desc_label.text = slot.data.description
+	item_stats_label.text = "
+".join(slot.data.get_stat_lines())
 	use_button.visible   = slot.data is ConsumableData
 
 func _on_use_pressed() -> void: _use_selected()

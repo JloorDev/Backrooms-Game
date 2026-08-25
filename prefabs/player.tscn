@@ -10,8 +10,9 @@
 [ext_resource type="Script" uid="uid://b2yn3djee7qt3" path="res://scripts/player/inventory_manager.gd" id="6_g2jcq"]
 [ext_resource type="Script" uid="uid://b54y7510b1qnf" path="res://scripts/player/stats/fatigue_stat.gd" id="6_rgeog"]
 [ext_resource type="Script" uid="uid://c876d6t5n826t" path="res://scripts/player/stats/sanity_effects.gd" id="7_opo22"]
-[ext_resource type="PackedScene" uid="uid://60n0abi25l71" path="res://prefabs/hud.tscn" id="7_u51tk"]
 [ext_resource type="Script" uid="uid://btb2mdwptj1ox" path="res://scripts/player/stats/player_state_manager.gd" id="8_8rb0w"]
+[ext_resource type="Script" uid="uid://cj02lbfbr060n" path="res://scripts/player/hotbar_manager.gd" id="12_m2qjg"]
+[ext_resource type="PackedScene" uid="uid://60n0abi25l71" path="res://prefabs/hud.tscn" id="13_m2qjg"]
 
 [sub_resource type="Gradient" id="Gradient_72ieh"]
 offsets = PackedFloat32Array(1)
@@ -70,7 +71,6 @@ script = ExtResource("6_rgeog")
 [node name="SanityEffects" type="Node" parent="." unique_id=1194205318]
 script = ExtResource("7_opo22")
 camera_path = NodePath("../Camera")
-canvas_layer_path = NodePath("../HUD")
 
 [node name="PlayerStateManager" type="Node" parent="." unique_id=395721991]
 script = ExtResource("8_8rb0w")
@@ -78,4 +78,8 @@ script = ExtResource("8_8rb0w")
 [node name="InventoryManager" type="Node" parent="." unique_id=22130029]
 script = ExtResource("6_g2jcq")
 
-[node name="HUD" parent="." unique_id=1040680160 instance=ExtResource("7_u51tk")]
+[node name="HotbarManager" type="Node" parent="." unique_id=117309064]
+script = ExtResource("12_m2qjg")
+metadata/_custom_type_script = "uid://cj02lbfbr060n"
+
+[node name="HUD" parent="." unique_id=1040680160 instance=ExtResource("13_m2qjg")]

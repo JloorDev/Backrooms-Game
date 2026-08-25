@@ -4,22 +4,24 @@ class_name InventoryManager
 signal inventory_changed
 signal item_dropped(data:ItemData)
 signal weight_changed(current:float, max_weight:float)
+signal equipment_changed
+signal bag_dropped(bag:EquipmentData, old_hotbar_slots:int, new_hotbar_slots:int)
 
-const SLOT_COUNT:int = 16
+const SLOT_COUNT:int = 8
+const BASE_HOTBAR_SLOTS:int = 3
 
 @export var base_max_weight:float = 30.0
 
-# Cada slot es null o { data: ItemData, quantity: int }
 var slots:Array = []
+
+var equipped:Dictionary = {}
 
 func _ready() -> void:
 	slots.resize(SLOT_COUNT)
 	slots.fill(null)
 
-# ── API pública ──────────────────────────────────────────────────────────────
 
 func add_item(data:ItemData) -> bool:
-	# Intenta apilar primero
 	if data.max_stack > 1:
 		for i in SLOT_COUNT:
 			if slots[i] == null:
@@ -30,7 +32,6 @@ func add_item(data:ItemData) -> bool:
 				weight_changed.emit(get_current_weight(), get_max_weight())
 				return true
 
-	# Busca slot vacío
 	for i in SLOT_COUNT:
 		if slots[i] == null:
 			slots[i] = { "data": data, "quantity": 1 }
@@ -38,7 +39,7 @@ func add_item(data:ItemData) -> bool:
 			weight_changed.emit(get_current_weight(), get_max_weight())
 			return true
 
-	return false  # inventario lleno
+	return false
 
 func consume_item_at(index:int) -> void:
 	if index < 0 or index >= SLOT_COUNT:
@@ -75,7 +76,10 @@ func get_current_weight() -> float:
 	return total
 
 func get_max_weight() -> float:
-	return base_max_weight
+	var bonus:float = 0.0
+	if equipped.has("bag"):
+		bonus = equipped["bag"].weight_bonus
+	return base_max_weight + bonus
 
 func swap_slots(from:int, to:int) -> void:
 	if from < 0 or from >= SLOT_COUNT:
@@ -87,3 +91,34 @@ func swap_slots(from:int, to:int) -> void:
 	slots[from] = temp
 	inventory_changed.emit()
 	weight_changed.emit(get_current_weight(), get_max_weight())
+
+func equip_item(data:EquipmentData) -> EquipmentData:
+	var previous:EquipmentData = equipped.get(data.equip_slot)
+	equipped[data.equip_slot] = data
+	equipment_changed.emit()
+	weight_changed.emit(get_current_weight(), get_max_weight())
+	return previous
+
+func get_equipped(equip_slot:String) -> EquipmentData:
+	return equipped.get(equip_slot)
+
+func get_hotbar_slot_count() -> int:
+	var bonus:int = 0
+	if equipped.has("bag"):
+		bonus = equipped["bag"].hotbar_slot_bonus
+	return BASE_HOTBAR_SLOTS + bonus
+
+func drop_equipped_bag() -> EquipmentData:
+	if not equipped.has("bag"):
+		return null
+
+	var bag:EquipmentData = equipped["bag"]
+	var old_hotbar_slots:int = get_hotbar_slot_count()
+	equipped.erase("bag")
+	var new_hotbar_slots:int = get_hotbar_slot_count()
+
+	equipment_changed.emit()
+	weight_changed.emit(get_current_weight(), get_max_weight())
+	bag_dropped.emit(bag, old_hotbar_slots, new_hotbar_slots)
+
+	return bag

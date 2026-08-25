@@ -21,7 +21,7 @@ var _sanity_effects: SanityEffects = null
 
 func _ready() -> void:
 	stats.set_inventory($InventoryManager)
-	$HUD.init(stats, $InventoryManager, psm)
+	$HUD.init(stats, $InventoryManager, psm, $HotbarManager)
 
 	var se = get_node_or_null("SanityEffects")
 	if se:

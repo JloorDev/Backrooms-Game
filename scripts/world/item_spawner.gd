@@ -3,17 +3,24 @@ class_name ItemSpawner
 
 const ITEM_SCENES:Dictionary = {
 	"almond_water": preload("res://prefabs/interactables/almond_water.tscn"),
+	"backpack_basic": preload("res://prefabs/interactables/backpack_basic.tscn"),
 }
 
 var _player:CharacterBody2D = null
 var _inventory:InventoryManager = null
 
-func init(player:CharacterBody2D, inventory:InventoryManager) -> void:
+func init(player:CharacterBody2D, inventory:InventoryManager, hotbar:HotbarManager = null) -> void:
 	_player = player
 	_inventory = inventory
-	_inventory.item_dropped.connect(_on_item_dropped)
+	_inventory.item_dropped.connect(_spawn_item)
+	_inventory.bag_dropped.connect(_on_bag_dropped)
+	if hotbar != null:
+		hotbar.item_dropped.connect(_spawn_item)
 
-func _on_item_dropped(data:ItemData) -> void:
+func _on_bag_dropped(bag:EquipmentData, _old_hotbar_slots:int, _new_hotbar_slots:int) -> void:
+	_spawn_item(bag)
+
+func _spawn_item(data:ItemData) -> void:
 	if not ITEM_SCENES.has(data.id):
 		push_warning("ItemSpawner: no hay escena registrada para id '%s'" % data.id)
 		return

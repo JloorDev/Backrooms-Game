@@ -23,7 +23,7 @@ enum FatigueTier {
 
 var current:     float = max_fatigue
 var tier:        FatigueTier = FatigueTier.RESTED
-var is_resting:  bool  = false
+var is_resting:  bool  = false  # lo controla RestHandler mientras se mantiene "rest" e IDLE
 
 var _hunger_pct: float = 1.0
 var _thirst_pct: float = 1.0

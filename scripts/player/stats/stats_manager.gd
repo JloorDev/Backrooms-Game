@@ -8,38 +8,38 @@ signal sanity_event(event: SanityEvent)
 
 enum SanityEvent { GHOST_SOUND, LIGHT_FLICKER, HALLUCINATION }
 
-@export var max_stamina:            float = 100.0
-@export var max_health:             float = 100.0
-@export var stamina_drain_jog:      float = 1.2
-@export var stamina_drain_run:      float = 3.5
-@export var stamina_drain_thirst:   float = 0.65
-@export var stamina_regen:          float = 2.5
-@export var health_drain_thirst:    float = 0.25
-@export var overload_speed_penalty: float = 0.30
-@export var overload_stamina_mult:  float = 2.0
-@export var critical_overload_health_drain: float = 2.0
+@export var max_stamina:float = 100.0
+@export var max_health:float = 100.0
+@export var stamina_drain_jog:float = 1.2
+@export var stamina_drain_run:float = 3.5
+@export var stamina_drain_thirst:float = 0.65
+@export var stamina_regen:float = 2.5
+@export var health_drain_thirst:float = 0.25
+@export var overload_speed_penalty:float = 0.30
+@export var overload_stamina_mult:float = 2.0
+@export var critical_overload_health_drain:float = 2.0
 
-@export var run_threshold: float = 0.40
+@export var run_threshold:float = 0.40
 
-@onready var hunger:  HungerStat  = $HungerStat
-@onready var thirst:  ThirstStat  = $ThirstStat
-@onready var sanity:  SanityStat  = $SanityStat
-@onready var fatigue: FatigueStat = $FatigueStat
-@onready var psm: PlayerStateManager = get_parent().get_node("PlayerStateManager")
+@onready var hunger:HungerStat = $HungerStat
+@onready var thirst:ThirstStat = $ThirstStat
+@onready var sanity:SanityStat = $SanityStat
+@onready var fatigue:FatigueStat = $FatigueStat
+@onready var psm:PlayerStateManager = get_parent().get_node("PlayerStateManager")
 
 signal light_exposure_changed(in_light: bool)
-var is_in_light: bool = true
+var is_in_light:bool = true
 
-var stamina:       float = 0.0
-var health:        float = 0.0
-var is_overloaded: bool  = false
+var stamina:float = 0.0
+var health:float = 0.0
+var is_overloaded:bool = false
 
-var _movement_state: int              = 0
-var _inventory:      InventoryManager = null
-var _sanity_effects: SanityEffects    = null
+var _movement_state:int = 0
+var _inventory:InventoryManager = null
+var _sanity_effects:SanityEffects = null
 
-var _run_locked: bool = false
-var _fully_exhausted: bool = false
+var _run_locked:bool = false
+var _fully_exhausted:bool = false
 
 func _ready() -> void:
 	stamina = max_stamina
@@ -54,6 +54,10 @@ func _physics_process(delta: float) -> void:
 	
 	if _inventory.get_weight_tier() == InventoryManager.WeightTier.CRITICAL:
 		_set_health(health - critical_overload_health_drain * delta)
+
+	var extra_health_drain:float = psm.get_health_drain_extra()
+	if extra_health_drain > 0.0:
+		_set_health(health - extra_health_drain * delta)
 
 	hunger.drain(delta, is_running)
 	thirst.drain(delta, is_running or is_jogging)
@@ -100,6 +104,7 @@ func get_speed_multiplier() -> float:
 	if is_overloaded:
 		mult *= (1.0 - overload_speed_penalty)
 	mult *= fatigue.get_speed_penalty()
+	mult *= psm.get_speed_multiplier()
 	if _sanity_effects:
 		mult *= _sanity_effects.get_speed_penalty()
 	return mult
@@ -107,6 +112,7 @@ func get_speed_multiplier() -> float:
 func get_stamina_drain_multiplier() -> float:
 	var mult = overload_stamina_mult if is_overloaded else 1.0
 	mult *= fatigue.get_stamina_drain_mult()
+	mult *= psm.get_stamina_drain_mult()
 	return mult
 
 func _update_stamina(delta: float, is_jogging: bool, is_running: bool) -> void:

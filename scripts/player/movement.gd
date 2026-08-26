@@ -1,12 +1,12 @@
 extends CharacterBody2D
 class_name PlayerMovement
 
-const WALK_SPEED:   float = 45.0
-const JOG_SPEED:    float = 65.0
-const RUN_SPEED:    float = 90.0
-const CROUCH_SPEED: float = 25.0
-const ACCELERATION: float = 800.0
-const FRICTION: float = 600.0
+const WALK_SPEED:float = 45.0
+const JOG_SPEED:float = 65.0
+const RUN_SPEED:float = 90.0
+const CROUCH_SPEED:float = 25.0
+const ACCELERATION:float = 800.0
+const FRICTION:float = 600.0
 
 enum State { IDLE, WALK, JOG, RUN, CROUCH }
 var state: State = State.IDLE

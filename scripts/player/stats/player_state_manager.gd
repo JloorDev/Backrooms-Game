@@ -47,9 +47,12 @@ const STATE_PENALTIES: Dictionary = {
 	PlayerState.THIRSTY:      {"stamina_regen": -0.1},
 	PlayerState.VERY_THIRSTY: {"speed": -0.10, "stamina_regen": -0.4, "sanity_drain": 0.05},
 	PlayerState.DEHYDRATED:   {"speed": -0.25, "stamina_regen": -0.8, "sanity_drain": 0.12, "health_drain": 0.10},
-	PlayerState.TIRED:        {"speed": -0.05, "stamina_drain": 1.2},
-	PlayerState.EXHAUSTED:    {"speed": -0.20, "stamina_drain": 1.6, "sanity_drain": 0.04},
-	PlayerState.DEAD_TIRED:   {"speed": -0.40, "stamina_drain": 2.2, "sanity_drain": 0.08, "can_run": false},
+	# Nota: TIRED/EXHAUSTED/DEAD_TIRED no llevan "speed" ni "stamina_drain" aquí
+	# porque FatigueStat.get_speed_penalty()/get_stamina_drain_mult() ya cubren
+	# esa penalización -- ponerla también aquí la aplicaría dos veces.
+	PlayerState.TIRED:        {},
+	PlayerState.EXHAUSTED:    {"sanity_drain": 0.04},
+	PlayerState.DEAD_TIRED:   {"sanity_drain": 0.08, "can_run": false},
 	PlayerState.ANXIOUS:      {"sanity_drain": 0.02},
 	PlayerState.DISTRESSED:   {"speed": -0.05, "sanity_drain": 0.04, "stamina_drain": 1.1},
 	PlayerState.PANICKING:    {"speed": -0.15, "sanity_drain": 0.08, "stamina_drain": 1.3, "input_noise": 0.3},
@@ -81,22 +84,22 @@ const STATE_NAMES: Dictionary = {
 	PlayerState.OVERLOADED:   "Sobrecargado",
 }
 
-@onready var stats: StatsManager = $"../StatsManager"
+@onready var stats:StatsManager = $"../StatsManager"
 
-var _active_states: Array[PlayerState] = []
-var _last_states:   Array[PlayerState] = []
-var _check_timer:   float = 0.0
-const CHECK_INTERVAL: float = 0.5
+var _active_states:Array[PlayerState] = []
+var _last_states:Array[PlayerState] = []
+var _check_timer:float = 0.0
+const CHECK_INTERVAL:float = 0.5
 
-var _speed_penalty:      float = 0.0
-var _stamina_drain_mult: float = 1.0
-var _stamina_regen_mult: float = 1.0
-var _sanity_drain_extra: float = 0.0
-var _health_drain_extra: float = 0.0
-var _input_noise_mult:   float = 0.0
-var _carry_bonus:        float = 0.0
-var _can_run:  bool = true
-var _can_jog:  bool = true
+var _speed_penalty:float = 0.0
+var _stamina_drain_mult:float = 1.0
+var _stamina_regen_mult:float = 1.0
+var _sanity_drain_extra:float = 0.0
+var _health_drain_extra:float = 0.0
+var _input_noise_mult:float = 0.0
+var _carry_bonus:float = 0.0
+var _can_run:bool = true
+var _can_jog:bool = true
 
 func _process(delta: float) -> void:
 	_check_timer += delta

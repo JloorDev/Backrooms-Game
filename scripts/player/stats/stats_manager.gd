@@ -17,6 +17,7 @@ enum SanityEvent { GHOST_SOUND, LIGHT_FLICKER, HALLUCINATION }
 @export var health_drain_thirst:    float = 0.25
 @export var overload_speed_penalty: float = 0.30
 @export var overload_stamina_mult:  float = 2.0
+@export var critical_overload_health_drain: float = 2.0
 
 @export var run_threshold: float = 0.40
 
@@ -50,6 +51,9 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	var is_jogging: bool = _movement_state == PlayerMovement.State.JOG
 	var is_running: bool = _movement_state == PlayerMovement.State.RUN
+	
+	if _inventory.get_weight_tier() == InventoryManager.WeightTier.CRITICAL:
+		_set_health(health - critical_overload_health_drain * delta)
 
 	hunger.drain(delta, is_running)
 	thirst.drain(delta, is_running or is_jogging)

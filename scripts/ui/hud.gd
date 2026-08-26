@@ -17,15 +17,19 @@ class_name HUD
 @onready var btn_inventory: Button = $QuickBar/BtnInventory
 @onready var btn_player:    Button = $QuickBar/BtnPlayer
 
-@onready var grid:            GridContainer = $InventoryPanel/GridContainer
+@onready var grid_view:       ItemGridView  = $InventoryPanel/ItemGridView
 @onready var weight_label:    Label         = $InventoryPanel/WeightLabel
 @onready var item_name_label: Label         = $InventoryPanel/ItemInfoPanel/ItemNameLabel
 @onready var item_desc_label: Label         = $InventoryPanel/ItemInfoPanel/ItemDescLabel
 @onready var item_stats_label: Label        = $InventoryPanel/ItemInfoPanel/ItemStatsLabel
+@onready var equipped_bag_icon:  TextureRect = $InventoryPanel/EquippedBagIcon
+@onready var equipped_bag_label: Label       = $InventoryPanel/EquippedBagLabel
+@onready var drop_bag_button:    Button      = $InventoryPanel/DropBagButton
 @onready var use_button:      Button        = $InventoryPanel/ItemInfoPanel/UseButton
 @onready var context_menu:    Panel         = $InventoryPanel/ContextMenu
 @onready var ctx_use:         Button        = $InventoryPanel/ContextMenu/VBoxContainer/UseButton
 @onready var ctx_drop:        Button        = $InventoryPanel/ContextMenu/VBoxContainer/DropButton
+@onready var ctx_equip:       Button        = $InventoryPanel/ContextMenu/VBoxContainer/EquipButton
 
 const COLOR_HIGH: Color = Color(0.20, 0.75, 0.25)
 const COLOR_MID:  Color = Color(0.90, 0.70, 0.10)
@@ -47,9 +51,8 @@ var _stats:     StatsManager       = null
 var _inventory: InventoryManager   = null
 var _psm:       PlayerStateManager = null
 
-var _selected_slot: int = -1
-var _slot_nodes: Array[InventorySlot] = []
-var _context_slot: int = -1
+var _selected_entry: Variant = null
+var _context_entry: Variant = null
 
 const SLOT_SCENE = preload("res://prefabs/ui/inventory_slot.tscn")
 
@@ -67,6 +70,7 @@ func init(stats: StatsManager, inventory: InventoryManager, psm: PlayerStateMana
 	_build_hotbar()
 	_connect_signals()
 	_refresh_all()
+	_refresh_equipped_bag()
 
 	stats_panel.visible    = false
 	inventory_panel.visible = false
@@ -118,7 +122,8 @@ func _toggle_stats() -> void:
 func _toggle_inventory() -> void:
 	inventory_panel.visible = !inventory_panel.visible
 	_close_context()
-	_selected_slot = -1
+	_selected_entry = null
+	grid_view.set_selected(null)
 	_refresh_item_info()
 
 func _toggle_player_panel() -> void:
@@ -167,9 +172,16 @@ func _connect_signals() -> void:
 	_stats.sanity.sanity_changed.connect(_on_sanity_changed)
 	_inventory.inventory_changed.connect(_refresh_grid)
 	_inventory.weight_changed.connect(_on_weight_changed)
+	_inventory.weight_tier_changed.connect(_on_weight_tier_changed)
+	_inventory.equipment_changed.connect(_refresh_equipped_bag)
+	drop_bag_button.pressed.connect(_on_drop_bag_pressed)
+	grid_view.item_selected.connect(_on_grid_item_selected)
+	grid_view.item_context_requested.connect(_on_grid_item_context)
+	grid_view.empty_clicked.connect(_on_grid_empty_clicked)
 	use_button.pressed.connect(_on_use_pressed)
 	ctx_use.pressed.connect(_on_ctx_use)
 	ctx_drop.pressed.connect(_on_ctx_drop)
+	ctx_equip.pressed.connect(_on_ctx_equip)
 	btn_stats.pressed.connect(_toggle_stats)
 	btn_inventory.pressed.connect(_toggle_inventory)
 	btn_player.pressed.connect(_toggle_player_panel)
@@ -177,6 +189,20 @@ func _connect_signals() -> void:
 		_psm.states_changed.connect(_on_states_changed)
 	if _hotbar:
 		_hotbar.hotbar_changed.connect(_refresh_hotbar)
+
+func _refresh_equipped_bag() -> void:
+	var bag: EquippedBag = _inventory.get_equipped("bag")
+	if bag == null:
+		equipped_bag_icon.texture = null
+		equipped_bag_label.text = "Sin mochila"
+		drop_bag_button.visible = false
+	else:
+		equipped_bag_icon.texture = bag.data.icon
+		equipped_bag_label.text = bag.data.display_name
+		drop_bag_button.visible = true
+
+func _on_drop_bag_pressed() -> void:
+	_inventory.drop_equipped_bag()
 
 func _refresh_all() -> void:
 	_target["health"]  = (_stats.health  / _stats.max_health)  * 100.0
@@ -239,86 +265,97 @@ func _refresh_hotbar() -> void:
 		slot_node.refresh()
 
 func _build_grid() -> void:
-	for child in grid.get_children():
-		child.queue_free()
-	_slot_nodes.clear()
-	for i in InventoryManager.SLOT_COUNT:
-		var slot_node: InventorySlot = SLOT_SCENE.instantiate()
-		grid.add_child(slot_node)
-		slot_node.init(i, _inventory)
-		slot_node.slot_selected.connect(_on_slot_pressed.bind(i))
-		slot_node.slot_context_requested.connect(_on_context_requested)
-		_slot_nodes.append(slot_node)
+	grid_view.init(_inventory)
+	# TODO (Capa 3, paso 2): dibujar los items colocados encima de la grilla.
 
 func _refresh_grid() -> void:
-	for slot_node in _slot_nodes:
-		slot_node.refresh()
-		var flat: StyleBoxFlat = StyleBoxFlat.new()
-		flat.bg_color = Color(0.3, 0.6, 1.0, 0.4) if slot_node.slot_index == _selected_slot \
-			else Color(0.15, 0.15, 0.15, 0.6)
-		flat.border_width_left   = 1
-		flat.border_width_right  = 1
-		flat.border_width_top    = 1
-		flat.border_width_bottom = 1
-		slot_node.add_theme_stylebox_override("panel", flat)
+	grid_view.refresh()
 
 func _on_weight_changed(current: float, max_w: float) -> void:
-	weight_label.text = "Peso: %.1f / %.1f kg" % [current, max_w]
+	var suffix := ""
+	match _inventory.get_weight_tier():
+		InventoryManager.WeightTier.CRITICAL:
+			suffix = " -- ¡SOBRECARGA CRÍTICA!"
+		InventoryManager.WeightTier.OVERLOADED:
+			suffix = " -- Sobrecargado"
+	weight_label.text = "Peso: %.1f / %.1f kg%s" % [current, max_w, suffix]
 
-func _on_slot_pressed(index: int) -> void:
-	_selected_slot = index
-	_refresh_grid()
+func _on_weight_tier_changed(tier: InventoryManager.WeightTier) -> void:
+	match tier:
+		InventoryManager.WeightTier.CRITICAL:
+			weight_label.add_theme_color_override("font_color", Color(0.9, 0.2, 0.2))
+		InventoryManager.WeightTier.OVERLOADED:
+			weight_label.add_theme_color_override("font_color", Color(0.9, 0.75, 0.15))
+		InventoryManager.WeightTier.NORMAL:
+			weight_label.remove_theme_color_override("font_color")
+
+func _on_grid_item_selected(entry: Dictionary) -> void:
+	_selected_entry = entry
+	grid_view.set_selected(entry)
+	_refresh_item_info()
+
+func _on_grid_empty_clicked() -> void:
+	_selected_entry = null
+	grid_view.set_selected(null)
 	_refresh_item_info()
 
 func _refresh_item_info() -> void:
-	var slot = null
-	if _selected_slot >= 0:
-		slot = _inventory.get_slot(_selected_slot)
-	if slot == null:
+	if _selected_entry == null:
 		item_name_label.text = ""
 		item_desc_label.text = ""
 		item_stats_label.text = ""
 		use_button.visible   = false
 		return
-	item_name_label.text = slot.data.display_name
-	item_desc_label.text = slot.data.description
+	var data: ItemData = _selected_entry.data
+	item_name_label.text = data.display_name
+	item_desc_label.text = data.description
 	item_stats_label.text = "
-".join(slot.data.get_stat_lines())
-	use_button.visible   = slot.data is ConsumableData
+".join(data.get_stat_lines())
+	use_button.visible   = data is ConsumableData
 
-func _on_use_pressed() -> void: _use_selected()
-
-func _use_selected() -> void:
-	if _selected_slot < 0: return
-	var slot = _inventory.get_slot(_selected_slot)
-	if slot == null: return
-	if slot.data is ConsumableData:
-		_stats.use_consumable(slot.data)
-		_inventory.consume_item_at(_selected_slot)
+func _on_use_pressed() -> void:
+	if _selected_entry == null:
+		return
+	var data: ItemData = _selected_entry.data
+	if data is ConsumableData:
+		_stats.use_consumable(data)
+		_inventory.consume_one(_selected_entry)
+		_selected_entry = null
+		grid_view.set_selected(null)
 		_refresh_item_info()
 
-func _on_context_requested(index: int, global_pos: Vector2) -> void:
-	_context_slot = index
+func _on_grid_item_context(entry: Dictionary, global_pos: Vector2) -> void:
+	_context_entry = entry
 	context_menu.global_position = global_pos
 	context_menu.visible = true
-	var slot = _inventory.get_slot(index)
-	ctx_use.visible = slot != null and slot.data is ConsumableData
+	ctx_use.visible = entry.data is ConsumableData
+	ctx_equip.visible = entry.data is EquipmentData
 
 func _on_ctx_use() -> void:
-	if _context_slot < 0: return
-	var slot = _inventory.get_slot(_context_slot)
-	if slot != null and slot.data is ConsumableData:
-		_stats.use_consumable(slot.data)
-		_inventory.consume_item_at(_context_slot)
+	if _context_entry != null and _context_entry.data is ConsumableData:
+		_stats.use_consumable(_context_entry.data)
+		_inventory.consume_one(_context_entry)
+		_selected_entry = null
+		grid_view.set_selected(null)
+		_refresh_item_info()
+	_close_context()
+
+func _on_ctx_equip() -> void:
+	if _context_entry != null and _context_entry.data is EquipmentData:
+		_inventory.equip_from_entry(_context_entry)
+		_selected_entry = null
+		grid_view.set_selected(null)
 		_refresh_item_info()
 	_close_context()
 
 func _on_ctx_drop() -> void:
-	if _context_slot < 0: return
-	_inventory.drop_item_at(_context_slot)
-	_refresh_item_info()
+	if _context_entry != null:
+		_inventory.drop_entry(_context_entry)
+		_selected_entry = null
+		grid_view.set_selected(null)
+		_refresh_item_info()
 	_close_context()
 
 func _close_context() -> void:
 	context_menu.visible = false
-	_context_slot = -1
+	_context_entry = null

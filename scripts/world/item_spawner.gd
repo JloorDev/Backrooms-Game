@@ -17,8 +17,10 @@ func init(player:CharacterBody2D, inventory:InventoryManager, hotbar:HotbarManag
 	if hotbar != null:
 		hotbar.item_dropped.connect(_spawn_item)
 
-func _on_bag_dropped(bag:EquipmentData, _old_hotbar_slots:int, _new_hotbar_slots:int) -> void:
-	_spawn_item(bag)
+func _on_bag_dropped(bag:EquippedBag, _old_hotbar_slots:int, _new_hotbar_slots:int) -> void:
+	# TODO: preservar el contenido real de bag.grid al volver a instanciarla
+	# en el mundo -- por ahora solo recreamos el objeto vacio (bag.data).
+	_spawn_item(bag.data)
 
 func _spawn_item(data:ItemData) -> void:
 	if not ITEM_SCENES.has(data.id):

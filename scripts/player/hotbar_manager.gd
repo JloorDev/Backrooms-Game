@@ -63,7 +63,7 @@ func _on_equipment_changed() -> void:
 		slots.resize(new_count)
 		hotbar_changed.emit()
 
-func _on_bag_dropped(_bag:EquipmentData, old_count:int, new_count:int) -> void:
+func _on_bag_dropped(_bag:EquippedBag, old_count:int, new_count:int) -> void:
 	for i in range(new_count, old_count):
 		if i < slots.size() and slots[i] != null:
 			item_dropped.emit(slots[i].data)

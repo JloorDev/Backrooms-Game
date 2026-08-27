@@ -1,6 +1,21 @@
 extends Node
 class_name PlayerStateManager
 
+# Mira los porcentajes de hambre/sed/fatiga/cordura/estamina cada medio
+# segundo (no cada frame, no hace falta) y arma una lista de "estados"
+# activos (ej: HUNGRY + TIRED + WINDED a la vez, se pueden acumular).
+# Cada estado tiene su penalización en STATE_PENALTIES, y ESTE script
+# suma todas esas penalizaciones -- pero OJO, no las aplica él mismo.
+# Solo calcula los números; quien realmente los usa es StatsManager
+# (multiplicando la velocidad, el drenaje de estamina, etc.) y
+# PlayerMovement (preguntando can_run()/can_jog()).
+#
+# Nota aparte: la fatiga (TIRED/EXHAUSTED/DEAD_TIRED) NO lleva penalización
+# de velocidad ni estamina en la tabla de acá abajo -- eso ya lo maneja
+# FatigueStat con su propio sistema de niveles. Si le pones penalización
+# acá también, se aplica dos veces sin que se note a simple vista.
+# - JloorDev
+
 signal states_changed(active_states: Array)
 
 enum PlayerState {

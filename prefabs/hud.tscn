@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://60n0abi25l71"]
 
-[ext_resource type="Script" uid="uid://c6qkl2d3ny4xf" path="res://scripts/ui/hud.gd" id="1_73jnp"]
+[ext_resource type="Script" uid="uid://5lcx1qomsqjp" path="res://scripts/ui/hud.gd" id="1_73jnp"]
 [ext_resource type="Script" uid="uid://b7t08kird8v0e" path="res://scripts/ui/draggable_panel.gd" id="2_3ehsa"]
 [ext_resource type="Texture2D" uid="uid://ko1s0mqcqeac" path="res://sprites/hud/stats.png" id="3_448xx"]
-[ext_resource type="Script" uid="uid://ddpc6djgsjl1g" path="res://scripts/ui/inventory/item_grid_view.gd" id="3_ia4ll"]
+[ext_resource type="Script" uid="uid://dvewd0vwpeni5" path="res://scripts/ui/inventory/item_grid_view.gd" id="3_ia4ll"]
 [ext_resource type="Texture2D" uid="uid://bp1c542ycb28i" path="res://sprites/hud/inventory.png" id="4_d7ypv"]
 [ext_resource type="Script" uid="uid://bmayhmr4f2kw5" path="res://scripts/ui/hover_button.gd" id="4_mbxvq"]
 [ext_resource type="Texture2D" uid="uid://d0xolr4vlk04v" path="res://sprites/hud/player.png" id="5_env85"]
@@ -12,6 +12,7 @@
 script = ExtResource("1_73jnp")
 
 [node name="StatsPanel" type="Panel" parent="." unique_id=1932834618]
+unique_name_in_owner = true
 visible = false
 offset_left = 10.0
 offset_top = 10.0
@@ -41,7 +42,8 @@ layout_mode = 2
 layout_mode = 2
 text = "Vida"
 
-[node name="ProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/HealthBar" unique_id=848269074]
+[node name="HealthProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/HealthBar" unique_id=848269074]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 
@@ -52,7 +54,8 @@ layout_mode = 2
 layout_mode = 2
 text = "Resistencia"
 
-[node name="ProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/StaminaBar" unique_id=1401776136]
+[node name="StaminaProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/StaminaBar" unique_id=1401776136]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 
@@ -63,7 +66,8 @@ layout_mode = 2
 layout_mode = 2
 text = "Sed"
 
-[node name="ProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/ThirstBar" unique_id=402840745]
+[node name="ThirstProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/ThirstBar" unique_id=402840745]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 
@@ -74,7 +78,8 @@ layout_mode = 2
 layout_mode = 2
 text = "Hambre"
 
-[node name="ProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/HungerBar" unique_id=866497096]
+[node name="HungerProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/HungerBar" unique_id=866497096]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 
@@ -85,11 +90,13 @@ layout_mode = 2
 layout_mode = 2
 text = "Cordura"
 
-[node name="ProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/SanityBar" unique_id=484999999]
+[node name="SanityProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/SanityBar" unique_id=484999999]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 
 [node name="InventoryPanel" type="Panel" parent="." unique_id=1630681326]
+unique_name_in_owner = true
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -118,6 +125,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="WeightLabel" type="Label" parent="InventoryPanel" unique_id=110452600]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -131,6 +139,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ItemGridView" type="Control" parent="InventoryPanel" unique_id=634913703]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 4
 anchor_top = 0.5
@@ -157,6 +166,7 @@ grow_horizontal = 0
 grow_vertical = 2
 
 [node name="ItemNameLabel" type="Label" parent="InventoryPanel/ItemInfoPanel" unique_id=1322671734]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -171,6 +181,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ItemDescLabel" type="Label" parent="InventoryPanel/ItemInfoPanel" unique_id=786634809]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -185,6 +196,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ItemStatsLabel" type="Label" parent="InventoryPanel/ItemInfoPanel" unique_id=412694770]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -200,6 +212,7 @@ grow_vertical = 2
 autowrap_mode = 2
 
 [node name="UseButton" type="Button" parent="InventoryPanel/ItemInfoPanel" unique_id=2118194487]
+unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -216,6 +229,7 @@ theme_override_font_sizes/font_size = 12
 text = "Use \"R\" To Use"
 
 [node name="ContextMenu" type="Panel" parent="InventoryPanel" unique_id=261886804]
+unique_name_in_owner = true
 layout_mode = 0
 offset_right = 50.0
 offset_bottom = 40.0
@@ -229,37 +243,107 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 6
 
-[node name="UseButton" type="Button" parent="InventoryPanel/ContextMenu/VBoxContainer" unique_id=2146509039]
+[node name="CtxUseButton" type="Button" parent="InventoryPanel/ContextMenu/VBoxContainer" unique_id=2146509039]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_font_sizes/font_size = 6
 text = "Use"
 
-[node name="DropButton" type="Button" parent="InventoryPanel/ContextMenu/VBoxContainer" unique_id=1439352796]
+[node name="CtxDropButton" type="Button" parent="InventoryPanel/ContextMenu/VBoxContainer" unique_id=1439352796]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 6
 text = "Drop"
 
-[node name="EquipButton" type="Button" parent="InventoryPanel/ContextMenu/VBoxContainer" unique_id=1783380538]
+[node name="CtxEquipButton" type="Button" parent="InventoryPanel/ContextMenu/VBoxContainer" unique_id=1783380538]
+unique_name_in_owner = true
 layout_mode = 2
 text = "Equip"
 
 [node name="EquippedBagIcon" type="TextureRect" parent="InventoryPanel" unique_id=913182741]
+unique_name_in_owner = true
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
 [node name="EquippedBagLabel" type="Label" parent="InventoryPanel" unique_id=564051190]
+unique_name_in_owner = true
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
+offset_left = 46.0
+offset_top = 4.0
+offset_right = 195.0
+offset_bottom = 27.0
+vertical_alignment = 1
 
 [node name="DropBagButton" type="Button" parent="InventoryPanel" unique_id=541112475]
+unique_name_in_owner = true
 layout_mode = 0
-offset_right = 8.0
-offset_bottom = 8.0
+offset_top = 46.0
+offset_right = 92.0
+offset_bottom = 70.0
+theme_override_font_sizes/font_size = 11
+text = "Soltar mochila"
+
+[node name="OpenBagButton" type="Button" parent="InventoryPanel" unique_id=541112476]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 98.0
+offset_top = 46.0
+offset_right = 190.0
+offset_bottom = 70.0
+theme_override_font_sizes/font_size = 11
+text = "Abrir mochila"
+
+[node name="BagPanel" type="Panel" parent="." unique_id=634913710]
+unique_name_in_owner = true
+visible = false
+offset_left = 560.0
+offset_top = 80.0
+offset_right = 860.0
+offset_bottom = 340.0
+script = ExtResource("2_3ehsa")
+
+[node name="TitleLabel" type="Label" parent="BagPanel" unique_id=634913711]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -60.0
+offset_top = 10.0
+offset_right = 60.0
+offset_bottom = 33.0
+grow_horizontal = 2
+text = "Mochila"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BagWeightLabel" type="Label" parent="BagPanel" unique_id=634913713]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -80.0
+offset_top = 36.0
+offset_right = 80.0
+offset_bottom = 55.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BagGridView" type="Control" parent="BagPanel" unique_id=634913712]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 64.0
+offset_right = 224.0
+offset_bottom = 214.0
+script = ExtResource("3_ia4ll")
 
 [node name="PlayerPanel" type="Panel" parent="." unique_id=1111111111]
+unique_name_in_owner = true
 visible = false
 offset_left = 330.0
 offset_top = 10.0
@@ -280,19 +364,30 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="StatesContainer" type="VBoxContainer" parent="PlayerPanel/ScrollContainer" unique_id=1111111113]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 4
 
-[node name="QuickBar" type="HBoxContainer" parent="." unique_id=1111111114]
+[node name="QuickBarHoverZone" type="Control" parent="." unique_id=1111111120]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 0
+offset_right = 150.0
+offset_bottom = 310.0
+mouse_filter = 1
+
+[node name="QuickBar" type="VBoxContainer" parent="." unique_id=2038044285]
+unique_name_in_owner = true
 offset_left = 10.0
 offset_top = 10.0
-offset_right = 126.0
-offset_bottom = 38.0
+offset_right = 80.0
+offset_bottom = 268.0
 theme_override_constants/separation = 24
 
 [node name="BtnStats" type="Button" parent="QuickBar" unique_id=1111111115]
-custom_minimum_size = Vector2(70, 70)
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 tooltip_text = "Statistics"
 icon = ExtResource("3_448xx")
@@ -301,7 +396,8 @@ expand_icon = true
 script = ExtResource("4_mbxvq")
 
 [node name="BtnInventory" type="Button" parent="QuickBar" unique_id=1111111116]
-custom_minimum_size = Vector2(70, 70)
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 tooltip_text = "Inventory"
 icon = ExtResource("4_d7ypv")
@@ -310,7 +406,8 @@ expand_icon = true
 script = ExtResource("4_mbxvq")
 
 [node name="BtnPlayer" type="Button" parent="QuickBar" unique_id=1111111117]
-custom_minimum_size = Vector2(70, 70)
+unique_name_in_owner = true
+custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 tooltip_text = "Player Status"
 icon = ExtResource("5_env85")
@@ -319,6 +416,7 @@ expand_icon = true
 script = ExtResource("4_mbxvq")
 
 [node name="Hotbar" type="HBoxContainer" parent="." unique_id=849935202]
+unique_name_in_owner = true
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0

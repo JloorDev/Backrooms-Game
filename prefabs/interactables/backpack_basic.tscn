@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://ddkbyckhyr3nt"]
 
-[ext_resource type="Script" uid="uid://crk543q0fs1j1" path="res://scripts/items/item_pickup.gd" id="1_h2178"]
+[ext_resource type="Script" uid="uid://crk543q0fs1j1" path="res://scripts/items/pickups/item_pickup.gd" id="1_h2178"]
 [ext_resource type="Resource" uid="uid://bxj8vihayn3qn" path="res://resources/items/equipment/backpack_basic.tres" id="2_lh2rb"]
 [ext_resource type="Texture2D" uid="uid://bp1c542ycb28i" path="res://sprites/hud/inventory.png" id="3_h2178"]
 

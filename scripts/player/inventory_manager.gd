@@ -1,6 +1,18 @@
 extends Node
 class_name InventoryManager
 
+# El dueño de todo lo relacionado a qué cargas. body_grid es el inventario
+# general (lo que llevas encima, sin mochila), y "equipped" son las cosas
+# que tienes puestas -- por ahora solo el slot "bag", pero está pensado
+# como diccionario por si en algún momento hay más de un slot de equipo.
+#
+# Ojo con esto: un ítem colocado en una grilla se acuerda solo de a qué
+# grilla pertenece (entry.grid, lo pone ItemGrid.place_item). Por eso
+# remove_item/consume_one/drop_entry no necesitan que les digas "de dónde"
+# sacar el ítem -- funcionan igual si está en el cuerpo o adentro de la
+# mochila equipada.
+# - JloorDev
+
 signal inventory_changed
 signal item_dropped(data:ItemData)
 signal weight_changed(current:float, max_weight:float)
@@ -41,7 +53,7 @@ func add_item(data:ItemData, quantity:int = 1) -> bool:
 	return true
 
 func remove_item(entry:Dictionary) -> void:
-	body_grid.remove_item(entry)
+	entry.grid.remove_item(entry)
 	inventory_changed.emit()
 	_emit_weight_signals()
 
@@ -49,15 +61,35 @@ func remove_item(entry:Dictionary) -> void:
 func consume_one(entry:Dictionary) -> void:
 	entry.quantity -= 1
 	if entry.quantity <= 0:
-		body_grid.remove_item(entry)
+		entry.grid.remove_item(entry)
 	inventory_changed.emit()
 	_emit_weight_signals()
 
+## Saca una entrada de la grilla en la que esté (cuerpo o mochila) y la suelta
+## en el mundo -- se usa tanto para el botón "Soltar" del menú contextual como
+## para cuando arrastras un ítem fuera del panel de inventario.
 func drop_entry(entry:Dictionary) -> void:
-	body_grid.remove_item(entry)
+	entry.grid.remove_item(entry)
 	inventory_changed.emit()
 	_emit_weight_signals()
 	item_dropped.emit(entry.data)
+
+## Mueve una entrada ya colocada hacia otra celda -- puede ser dentro de la
+## misma grilla (reordenar) o hacia una grilla distinta (ej: del cuerpo a la
+## mochila equipada, o viceversa). Devuelve false si no cupo en el destino.
+func move_entry_to_grid(entry:Dictionary, to_grid:ItemGrid, new_origin:Vector2i) -> bool:
+	var from_grid:ItemGrid = entry.grid
+	if from_grid == to_grid:
+		return from_grid.move_item(entry, new_origin)
+
+	if not to_grid.can_place_at(entry.data, new_origin):
+		return false
+
+	from_grid.remove_item(entry)
+	to_grid.place_item(entry.data, new_origin, entry.quantity)
+	inventory_changed.emit()
+	_emit_weight_signals()
+	return true
 
 # ── Peso y sus 3 niveles ───────────────────────────────────────────────────────
 
@@ -99,11 +131,28 @@ func _emit_weight_signals() -> void:
 ## inventario general; si no cabe, se suelta al piso.
 func equip_from_entry(entry:Dictionary) -> void:
 	var data:EquipmentData = entry.data
-	body_grid.remove_item(entry)
+	entry.grid.remove_item(entry)
 
 	var previous:EquippedBag = equipped.get(data.equip_slot)
 	var new_bag:EquippedBag = EquippedBag.new(data)
 	equipped[data.equip_slot] = new_bag
+
+	if previous != null:
+		if not body_grid.add_item(previous.data):
+			item_dropped.emit(previous.data)  # no cupo, se cae al piso
+
+	inventory_changed.emit()
+	equipment_changed.emit()
+	_emit_weight_signals()
+
+## Vuelve a equipar una mochila que ya existía CON su contenido -- se usa al
+## recoger del piso una mochila que se había soltado con ítems adentro, para
+## no perderlos. A diferencia de equip_from_entry, no crea un EquippedBag
+## nuevo y vacío: reutiliza el mismo objeto (y su grilla interna) tal cual
+## estaba antes de soltarla.
+func equip_existing_bag(bag:EquippedBag) -> void:
+	var previous:EquippedBag = equipped.get(bag.data.equip_slot)
+	equipped[bag.data.equip_slot] = bag
 
 	if previous != null:
 		if not body_grid.add_item(previous.data):

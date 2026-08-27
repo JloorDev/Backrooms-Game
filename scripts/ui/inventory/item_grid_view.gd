@@ -1,6 +1,14 @@
 extends Control
 class_name ItemGridView
 
+# Dibuja UNA grilla (ItemGrid) como cuadraditos clickeables -- no le importa
+# si es el inventario del cuerpo o el interior de una mochila, por eso se
+# usa dos veces en el HUD (InventoryPanel e BagPanel) con la misma escena.
+# Recibe todo por init(): a qué InventoryManager avisarle de los cambios,
+# qué grilla dibujar, y qué paneles cuentan como "zona de inventario" para
+# lo de arrastrar-y-soltar-fuera-tira-el-ítem (ver _notification más abajo).
+# - JloorDev
+
 signal item_selected(entry: Dictionary)
 signal item_context_requested(entry: Dictionary, global_pos: Vector2)
 signal empty_clicked
@@ -9,18 +17,31 @@ signal empty_clicked
 @export var cell_gap: int = 4
 
 var _inventory: InventoryManager = null
+var _grid: ItemGrid = null
+var _bounds_controls: Array = []
 var _cell_panels: Array = []
 var _item_nodes: Array = []
 var _highlight: Panel = null
 var _selected_entry_ref: Variant = null
 
 var _drop_highlight: Panel = null
+var _dragging_entry: Variant = null
 
-func init(inventory: InventoryManager) -> void:
+## inventory: para operaciones (drop_entry, move_entry_to_grid, etc).
+## grid: la grilla que ESTA vista en particular debe dibujar -- puede ser
+## _inventory.body_grid o el .grid interno de una mochila equipada.
+## bounds_controls: los paneles que cuentan como "zona de inventario" -- si
+## sueltas un ítem fuera de TODOS ellos, se tira al mundo. Pasa una lista
+## porque ahora el inventario general y la mochila son paneles separados,
+## y mover un ítem de uno a otro no debería contar como "tirarlo".
+func init(inventory: InventoryManager, grid: ItemGrid, bounds_controls: Array = []) -> void:
 	_inventory = inventory
+	_grid = grid
+	_bounds_controls = bounds_controls
 	_build_cells()
 	refresh()
-	mouse_exited.connect(_clear_drop_highlight)
+	if not mouse_exited.is_connected(_clear_drop_highlight):
+		mouse_exited.connect(_clear_drop_highlight)
 
 func _build_cells() -> void:
 	for child in get_children():
@@ -30,7 +51,7 @@ func _build_cells() -> void:
 	_highlight = null
 	_drop_highlight = null
 
-	var grid: ItemGrid = _inventory.body_grid
+	var grid: ItemGrid = _grid
 
 	custom_minimum_size = Vector2(
 		grid.width * (cell_size + cell_gap) - cell_gap,
@@ -62,10 +83,10 @@ func refresh() -> void:
 		node.queue_free()
 	_item_nodes.clear()
 
-	if _inventory == null:
+	if _inventory == null or _grid == null:
 		return
 
-	var grid: ItemGrid = _inventory.body_grid
+	var grid: ItemGrid = _grid
 	for entry in grid._placed:
 		_item_nodes.append(_create_item_node(entry))
 
@@ -155,7 +176,7 @@ func _gui_input(event: InputEvent) -> void:
 	if cell == null:
 		return
 
-	var entry = _inventory.body_grid.get_entry_at(cell.x, cell.y)
+	var entry = _grid.get_entry_at(cell.x, cell.y)
 
 	if event.button_index == MOUSE_BUTTON_LEFT:
 		if entry != null:
@@ -167,7 +188,7 @@ func _gui_input(event: InputEvent) -> void:
 			item_context_requested.emit(entry, get_global_mouse_position())
 
 func _pixel_to_cell(local_pos: Vector2) -> Variant:
-	var grid: ItemGrid = _inventory.body_grid
+	var grid: ItemGrid = _grid
 	var cx := int(local_pos.x / (cell_size + cell_gap))
 	var cy := int(local_pos.y / (cell_size + cell_gap))
 	if cx < 0 or cy < 0 or cx >= grid.width or cy >= grid.height:
@@ -180,9 +201,11 @@ func _get_drag_data(at_position: Vector2) -> Variant:
 	var cell = _pixel_to_cell(at_position)
 	if cell == null:
 		return null
-	var entry = _inventory.body_grid.get_entry_at(cell.x, cell.y)
+	var entry = _grid.get_entry_at(cell.x, cell.y)
 	if entry == null:
 		return null
+
+	_dragging_entry = entry
 
 	var preview := TextureRect.new()
 	preview.texture = entry.data.icon
@@ -204,7 +227,11 @@ func _can_drop_data(at_position: Vector2, data: Variant) -> bool:
 		return false
 
 	var cell_span := Vector2i(entry.data.grid_width, entry.data.grid_height)
-	var valid: bool = _inventory.body_grid.can_place_at_ignoring(entry.data, origin, entry)
+	var valid: bool
+	if entry.grid == _grid:
+		valid = _grid.can_place_at_ignoring(entry.data, origin, entry)
+	else:
+		valid = _grid.can_place_at(entry.data, origin)
 	_show_drop_highlight(origin, cell_span, valid)
 	return valid
 
@@ -214,8 +241,29 @@ func _drop_data(at_position: Vector2, data: Variant) -> void:
 	_clear_drop_highlight()
 	if origin == null:
 		return
-	_inventory.body_grid.move_item(entry, origin)
+	_inventory.move_entry_to_grid(entry, _grid, origin)
 	refresh()
+
+## Godot avisa a todo el árbol cuando termina un arrastre. Si el arrastre
+## que empezamos nosotros no fue aceptado por nadie (gui_is_drag_successful
+## == false) Y el mouse quedó fuera del panel de inventario, el jugador
+## soltó el ítem -- se comporta como tirarlo al piso.
+func _notification(what: int) -> void:
+	if what != NOTIFICATION_DRAG_END:
+		return
+	if _dragging_entry == null:
+		return
+
+	if not get_viewport().gui_is_drag_successful():
+		var outside_all: bool = true
+		for c in _bounds_controls:
+			if c != null and c.visible and c.get_global_rect().has_point(get_global_mouse_position()):
+				outside_all = false
+				break
+		if outside_all:
+			_inventory.drop_entry(_dragging_entry)
+
+	_dragging_entry = null
 
 func _show_drop_highlight(origin: Vector2i, size_cells: Vector2i, valid: bool) -> void:
 	if _drop_highlight == null:

@@ -2,15 +2,21 @@ class_name ItemGrid
 extends RefCounted
 
 ## Contenedor de inventario con grilla 2D real -- un ítem puede ocupar
-## más de una celda según item.grid_width/grid_height. Sin UI todavía;
-## esto es puro modelo de datos, para probarlo con print() primero.
+## más de una celda según item.grid_width/grid_height.
+##
+## Se usa para el inventario del cuerpo Y para el interior de las mochilas
+## equipadas (cada EquippedBag tiene el suyo) -- por eso cada entrada
+## colocada se guarda a sí misma un puntero a "grid" (ver place_item):
+## así, cuando movés un ítem por drag&drop, el código que recibe el drop
+## sabe de dónde vino sin que nadie tenga que pasarle ese dato aparte.
+## - JloorDev
 
 var width: int
 var height: int
 var max_weight: float
 
 var _cells: Array = []      # width*height; cada celda: null o el Dictionary del ítem colocado ahí
-var _placed: Array = []     # lista de { data: ItemData, quantity: int, origin: Vector2i }
+var _placed: Array = []     # lista de { data: ItemData, quantity: int, origin: Vector2i, grid: ItemGrid }
 
 func _init(w: int, h: int, weight_limit: float) -> void:
 	width = w
@@ -50,7 +56,7 @@ func find_free_spot(item: ItemData) -> Variant:
 func place_item(data: ItemData, origin: Vector2i, quantity: int = 1) -> bool:
 	if not can_place_at(data, origin):
 		return false
-	var entry := { "data": data, "quantity": quantity, "origin": origin }
+	var entry := { "data": data, "quantity": quantity, "origin": origin, "grid": self }
 	var size := Vector2i(data.grid_width, data.grid_height)
 	for y in range(origin.y, origin.y + size.y):
 		for x in range(origin.x, origin.x + size.x):

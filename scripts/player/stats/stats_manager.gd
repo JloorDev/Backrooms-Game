@@ -1,6 +1,16 @@
 extends Node
 class_name StatsManager
 
+# El corazón de la supervivencia: vida, estamina, y coordina a los otros
+# 4 stats (hambre/sed/cordura/fatiga, cada uno en su propio script dentro
+# de esta misma carpeta). Este archivo no calcula sus propias penalizaciones
+# de estado -- eso lo hace PlayerStateManager (nodo hermano) mirando los
+# porcentajes de todos los stats juntos. Por eso vas a ver que varias
+# funciones de acá (get_speed_multiplier, get_stamina_drain_multiplier)
+# multiplican por "psm.algo()" -- es literal ese otro script metiendo su
+# cuchara antes de que el número final le llegue al jugador.
+# - JloorDev
+
 signal overloaded_changed(is_overloaded: bool)
 signal stamina_changed(value: float, percent: float)
 signal health_changed(value: float, percent: float)
@@ -69,6 +79,7 @@ func _physics_process(delta: float) -> void:
 
 	fatigue.set_hunger_percent(hunger.get_percent())
 	fatigue.set_thirst_percent(thirst.get_percent())
+	fatigue.is_resting = _movement_state == PlayerMovement.State.IDLE or _movement_state == PlayerMovement.State.WALK
 	fatigue.drain(delta, _movement_state)
 
 	_update_stamina(delta, is_jogging, is_running)

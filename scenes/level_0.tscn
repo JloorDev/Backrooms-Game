@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://bxoag47ttes1x" path="res://prefabs/player.tscn" id="3_jv3i5"]
 [ext_resource type="PackedScene" uid="uid://d176rbf8r1pj7" path="res://prefabs/world/dust_motes.tscn" id="3_rhhhf"]
 [ext_resource type="Script" uid="uid://bqrgsh0o85ocx" path="res://scripts/player/movement.gd" id="4_ll25s"]
-[ext_resource type="Script" uid="uid://6byeo4fkbnjv" path="res://scripts/world/item_spawner.gd" id="5_sk60w"]
+[ext_resource type="Script" uid="uid://df63aemomj70a" path="res://scripts/world/item_spawner.gd" id="5_sk60w"]
 [ext_resource type="Script" uid="uid://mhjqy1td0p1a" path="res://scripts/environment/room_ambient.gd" id="6_om4r1"]
 [ext_resource type="PackedScene" uid="uid://7wwa43ml7t5y" path="res://prefabs/interactables/almond_water.tscn" id="8_qjcqe"]
 [ext_resource type="PackedScene" uid="uid://ddkbyckhyr3nt" path="res://prefabs/interactables/backpack_basic.tscn" id="9_jv3i5"]
@@ -43,7 +43,6 @@ script = ExtResource("4_ll25s")
 
 [node name="ItemSpawner" type="Node" parent="." unique_id=487056762]
 script = ExtResource("5_sk60w")
-metadata/_custom_type_script = "uid://6byeo4fkbnjv"
 
 [node name="RoomAmbient" type="CanvasModulate" parent="." unique_id=913995944]
 color = Color(0.05, 0.045, 0.04, 1)

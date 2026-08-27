@@ -1,35 +1,56 @@
 extends CanvasLayer
 class_name HUD
 
-@onready var health_bar:  ProgressBar = $StatsPanel/VBoxContainer/HealthBar/ProgressBar
-@onready var stamina_bar: ProgressBar = $StatsPanel/VBoxContainer/StaminaBar/ProgressBar
-@onready var thirst_bar:  ProgressBar = $StatsPanel/VBoxContainer/ThirstBar/ProgressBar
-@onready var hunger_bar:  ProgressBar = $StatsPanel/VBoxContainer/HungerBar/ProgressBar
-@onready var sanity_bar:  ProgressBar = $StatsPanel/VBoxContainer/SanityBar/ProgressBar
+# Todo lo de acá abajo usa "%NombreDelNodo" en vez de "$Panel/Cajita/Nodo".
+# Es el sistema de nombres únicos de Godot: le pones "Access as Unique Name"
+# a un nodo en el editor (click derecho en el árbol de la escena) y después
+# lo encontrás por su nombre sin importar dónde esté colgado. La ventaja es
+# que si más adelante querés reordenar el HUD -- meter cosas en carpetas,
+# agrupar paneles distinto, lo que sea -- lo hacés arrastrando en el editor
+# y este script ni se entera, sigue encontrando todo igual.
+# - JloorDev
 
-@onready var stats_panel:     Panel        = $StatsPanel
-@onready var inventory_panel: Panel        = $InventoryPanel
-@onready var player_panel:    Panel        = $PlayerPanel
-@onready var quick_bar:       HBoxContainer = $QuickBar
-@onready var states_container: VBoxContainer = $PlayerPanel/ScrollContainer/StatesContainer
+@onready var health_bar:  ProgressBar = %HealthProgressBar
+@onready var stamina_bar: ProgressBar = %StaminaProgressBar
+@onready var thirst_bar:  ProgressBar = %ThirstProgressBar
+@onready var hunger_bar:  ProgressBar = %HungerProgressBar
+@onready var sanity_bar:  ProgressBar = %SanityProgressBar
 
-@onready var btn_stats:     Button = $QuickBar/BtnStats
-@onready var btn_inventory: Button = $QuickBar/BtnInventory
-@onready var btn_player:    Button = $QuickBar/BtnPlayer
+@onready var stats_panel:      Panel         = %StatsPanel
+@onready var inventory_panel:  Panel         = %InventoryPanel
+@onready var player_panel:     Panel         = %PlayerPanel
+@onready var quick_bar:        VBoxContainer = %QuickBar
+@onready var quickbar_hover_zone: Control    = %QuickBarHoverZone
+@onready var states_container: VBoxContainer = %StatesContainer
 
-@onready var grid_view:       ItemGridView  = $InventoryPanel/ItemGridView
-@onready var weight_label:    Label         = $InventoryPanel/WeightLabel
-@onready var item_name_label: Label         = $InventoryPanel/ItemInfoPanel/ItemNameLabel
-@onready var item_desc_label: Label         = $InventoryPanel/ItemInfoPanel/ItemDescLabel
-@onready var item_stats_label: Label        = $InventoryPanel/ItemInfoPanel/ItemStatsLabel
-@onready var equipped_bag_icon:  TextureRect = $InventoryPanel/EquippedBagIcon
-@onready var equipped_bag_label: Label       = $InventoryPanel/EquippedBagLabel
-@onready var drop_bag_button:    Button      = $InventoryPanel/DropBagButton
-@onready var use_button:      Button        = $InventoryPanel/ItemInfoPanel/UseButton
-@onready var context_menu:    Panel         = $InventoryPanel/ContextMenu
-@onready var ctx_use:         Button        = $InventoryPanel/ContextMenu/VBoxContainer/UseButton
-@onready var ctx_drop:        Button        = $InventoryPanel/ContextMenu/VBoxContainer/DropButton
-@onready var ctx_equip:       Button        = $InventoryPanel/ContextMenu/VBoxContainer/EquipButton
+@onready var btn_stats:     Button = %BtnStats
+@onready var btn_inventory: Button = %BtnInventory
+@onready var btn_player:    Button = %BtnPlayer
+
+@onready var grid_view:        ItemGridView = %ItemGridView
+@onready var weight_label:     Label        = %WeightLabel
+@onready var item_name_label:  Label        = %ItemNameLabel
+@onready var item_desc_label:  Label        = %ItemDescLabel
+@onready var item_stats_label: Label        = %ItemStatsLabel
+@onready var equipped_bag_icon:  TextureRect = %EquippedBagIcon
+@onready var equipped_bag_label: Label       = %EquippedBagLabel
+@onready var drop_bag_button:    Button      = %DropBagButton
+@onready var open_bag_button:    Button      = %OpenBagButton
+@onready var use_button:      Button = %UseButton
+@onready var context_menu:    Panel  = %ContextMenu
+
+# Ojo con estos tres: hay OTRO botón "Use" en el panel de info del ítem
+# (arriba, use_button) y este de acá es el del menú contextual (click
+# derecho sobre un ítem). Por eso los nombré con prefijo "Ctx" en la
+# escena -- antes los dos se llamaban igual y prestaba a confundirse.
+# - JloorDev
+@onready var ctx_use:   Button = %CtxUseButton
+@onready var ctx_drop:  Button = %CtxDropButton
+@onready var ctx_equip: Button = %CtxEquipButton
+
+@onready var bag_panel:        Panel        = %BagPanel
+@onready var bag_grid_view:    ItemGridView = %BagGridView
+@onready var bag_weight_label: Label        = %BagWeightLabel
 
 const COLOR_HIGH: Color = Color(0.20, 0.75, 0.25)
 const COLOR_MID:  Color = Color(0.90, 0.70, 0.10)
@@ -41,11 +62,65 @@ const SMOOTH_SPEED: float = 60.0
 
 const ANIM_DURATION:  float = 0.25
 const QUICKBAR_SHOWN_X:  float = 10.0
-var   _quickbar_hidden_x: float = 0.0
 
-var _quickbar_visible: bool  = true
-var _quickbar_animating: bool = false
-var _quickbar_tween: Tween   = null
+# La barra siempre está a la vista -- el jugador no tiene forma de adivinar
+# que hay que pasar el mouse por una esquina, así que replegarla del todo
+# quedó descartado. Lo único que hace el hover ahora es atenuarla un poco
+# cuando no la estás usando, para que estorbe menos visualmente.
+#
+# Dos condiciones tienen que darse a la vez para que se atenúe:
+#   1. el mouse no está sobre la zona (QuickBarHoverZone), Y
+#   2. no hay ningún panel abierto (si estás revisando el inventario, por
+#      ejemplo, no tiene sentido que la barra se desvanezca de fondo).
+# Apenas deja de cumplirse cualquiera de las dos, vuelve a opacidad completa.
+#
+# "_quickbar_hover_token" cancela una espera vieja si algo cambió mientras
+# esperábamos: sube en 1 cada vez que se llama _update_quickbar_dim(), y al
+# terminar el await se compara -- si ya no coincide, alguien más reciente
+# (el mouse volvió, se abrió un panel) ya decidió otra cosa, así que no hacemos nada.
+# - JloorDev
+const QUICKBAR_DIM_DELAY: float = 0.35
+const QUICKBAR_DIM_ALPHA: float = 0.3
+
+var _mouse_in_quickbar_zone: bool = false
+var _quickbar_tween: Tween = null
+var _quickbar_hover_token: int = 0
+
+func _any_panel_open() -> bool:
+	return stats_panel.visible or inventory_panel.visible or player_panel.visible or bag_panel.visible
+
+func _update_quickbar_dim() -> void:
+	_quickbar_hover_token += 1
+	if _mouse_in_quickbar_zone or _any_panel_open():
+		_set_quickbar_alpha(1.0)
+	else:
+		_wait_and_dim_quickbar(_quickbar_hover_token)
+
+func _set_quickbar_alpha(target: float) -> void:
+	if _quickbar_tween and _quickbar_tween.is_valid():
+		_quickbar_tween.kill()
+	_quickbar_tween = create_tween()
+	_quickbar_tween.tween_property(quick_bar, "modulate:a", target, ANIM_DURATION)
+
+func _wait_and_dim_quickbar(token: int) -> void:
+	await get_tree().create_timer(QUICKBAR_DIM_DELAY).timeout
+	if token != _quickbar_hover_token:
+		return  # algo más reciente ya decidió el estado -- no pisarlo
+	_set_quickbar_alpha(QUICKBAR_DIM_ALPHA)
+
+# En vez de mouse_entered/mouse_exited de la zona (que Godot le quita a este
+# Control apenas el mouse pasa sobre CUALQUIER otro nodo dibujado encima,
+# como los propios botones -- por eso parpadeaba), preguntamos nosotros
+# mismos cada cuadro si el punto del mouse cae dentro del rectángulo de la
+# zona. Es una comprobación geométrica pura, no depende de qué nodo esté
+# "arriba" en ese pixel.
+# - JloorDev
+func _check_quickbar_hover() -> void:
+	var is_inside: bool = quickbar_hover_zone.get_global_rect().has_point(quickbar_hover_zone.get_global_mouse_position())
+	if is_inside == _mouse_in_quickbar_zone:
+		return
+	_mouse_in_quickbar_zone = is_inside
+	_update_quickbar_dim()
 
 var _stats:     StatsManager       = null
 var _inventory: InventoryManager   = null
@@ -56,11 +131,17 @@ var _context_entry: Variant = null
 
 const SLOT_SCENE = preload("res://prefabs/ui/inventory_slot.tscn")
 
-@onready var hotbar_container: HBoxContainer = $Hotbar
+@onready var hotbar_container: HBoxContainer = %Hotbar
 
 var _hotbar: HotbarManager = null
 var _hotbar_slot_nodes: Array[InventorySlot] = []
 
+# Todo esto arranca desde PlayerMovement._ready(), que llama a este init()
+# pasándole los managers reales del jugador (stats, inventario, etc). De
+# ahí para abajo, cada _refresh_x()/_build_x() se encarga de una sola
+# sección del HUD y se vuelve a llamar solo cuando la señal que le importa
+# cambia -- no hay ningún _process() recalculando cosas que no cambiaron.
+# - JloorDev
 func init(stats: StatsManager, inventory: InventoryManager, psm: PlayerStateManager = null, hotbar: HotbarManager = null) -> void:
 	_stats     = stats
 	_inventory = inventory
@@ -75,60 +156,42 @@ func init(stats: StatsManager, inventory: InventoryManager, psm: PlayerStateMana
 	stats_panel.visible    = false
 	inventory_panel.visible = false
 	player_panel.visible   = false
+	bag_panel.visible      = false
 
 	quick_bar.position.x = QUICKBAR_SHOWN_X
-	await get_tree().process_frame
-	_quickbar_hidden_x = -(quick_bar.size.x + 20.0)
+	quick_bar.modulate.a = 1.0
+
+	_update_quickbar_dim()
 
 func _process(delta: float) -> void:
 	_animate_bars(delta)
-
-func _toggle_quickbar() -> void:
-	if _quickbar_animating:
-		return
-
-	_quickbar_visible   = !_quickbar_visible
-	_quickbar_animating = true
-
-	if not _quickbar_visible:
-		stats_panel.visible     = false
-		inventory_panel.visible = false
-		player_panel.visible    = false
-
-	if _quickbar_tween and _quickbar_tween.is_valid():
-		_quickbar_tween.kill()
-
-	_quickbar_tween = create_tween()
-	_quickbar_tween.set_ease(Tween.EASE_OUT)
-	_quickbar_tween.set_trans(Tween.TRANS_CUBIC)
-
-	var target_x = QUICKBAR_SHOWN_X if _quickbar_visible else _quickbar_hidden_x
-	_quickbar_tween.tween_property(quick_bar, "position:x", target_x, ANIM_DURATION)
-	await _quickbar_tween.finished
-	_quickbar_animating = false
+	_check_quickbar_hover()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("toggle_quickbar"):
-		_toggle_quickbar()
-		get_viewport().set_input_as_handled()
-
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT and context_menu.visible:
 			_close_context()
 
 func _toggle_stats() -> void:
-	stats_panel.visible = !stats_panel.visible
+	stats_panel.toggle()
 
 func _toggle_inventory() -> void:
-	inventory_panel.visible = !inventory_panel.visible
+	var opening: bool = not inventory_panel.visible
+	inventory_panel.toggle()
+	if not opening and bag_panel.visible:
+		# no tiene sentido dejar la mochila abierta sola si cerraste el
+		# inventario general -- se cierra junto con él.
+		bag_panel.close()
+		open_bag_button.text = "Abrir mochila"
 	_close_context()
 	_selected_entry = null
-	grid_view.set_selected(null)
+	_clear_all_selections()
 	_refresh_item_info()
 
 func _toggle_player_panel() -> void:
-	player_panel.visible = !player_panel.visible
-	if player_panel.visible and _psm:
+	var opening: bool = not player_panel.visible
+	player_panel.toggle()
+	if opening and _psm:
 		_refresh_states_panel(_psm.get_active_states())
 
 # ─────────────────────────────────────────
@@ -175,9 +238,13 @@ func _connect_signals() -> void:
 	_inventory.weight_tier_changed.connect(_on_weight_tier_changed)
 	_inventory.equipment_changed.connect(_refresh_equipped_bag)
 	drop_bag_button.pressed.connect(_on_drop_bag_pressed)
+	open_bag_button.pressed.connect(_toggle_bag_panel)
 	grid_view.item_selected.connect(_on_grid_item_selected)
 	grid_view.item_context_requested.connect(_on_grid_item_context)
 	grid_view.empty_clicked.connect(_on_grid_empty_clicked)
+	bag_grid_view.item_selected.connect(_on_grid_item_selected)
+	bag_grid_view.item_context_requested.connect(_on_grid_item_context)
+	bag_grid_view.empty_clicked.connect(_on_grid_empty_clicked)
 	use_button.pressed.connect(_on_use_pressed)
 	ctx_use.pressed.connect(_on_ctx_use)
 	ctx_drop.pressed.connect(_on_ctx_drop)
@@ -185,6 +252,11 @@ func _connect_signals() -> void:
 	btn_stats.pressed.connect(_toggle_stats)
 	btn_inventory.pressed.connect(_toggle_inventory)
 	btn_player.pressed.connect(_toggle_player_panel)
+
+	for panel in [stats_panel, inventory_panel, player_panel, bag_panel]:
+		panel.opened.connect(_update_quickbar_dim)
+		panel.closed.connect(_update_quickbar_dim)
+
 	if _psm:
 		_psm.states_changed.connect(_on_states_changed)
 	if _hotbar:
@@ -196,10 +268,39 @@ func _refresh_equipped_bag() -> void:
 		equipped_bag_icon.texture = null
 		equipped_bag_label.text = "Sin mochila"
 		drop_bag_button.visible = false
+		open_bag_button.visible = false
+		open_bag_button.text = "Abrir mochila"
+		bag_panel.visible = false  # de golpe, no con animación: ya no hay mochila que mostrar
+		_update_quickbar_dim()  # bag_panel.visible cambió sin pasar por close(), así que esto no se enteró solo
 	else:
 		equipped_bag_icon.texture = bag.data.icon
 		equipped_bag_label.text = bag.data.display_name
 		drop_bag_button.visible = true
+		open_bag_button.visible = true
+		if bag_panel.visible:
+			bag_grid_view.init(_inventory, bag.grid, [inventory_panel, bag_panel])
+			_refresh_bag_weight_label()
+
+func _toggle_bag_panel() -> void:
+	var bag: EquippedBag = _inventory.get_equipped("bag")
+	if bag == null:
+		return
+	var opening: bool = not bag_panel.visible
+	bag_panel.toggle()
+	open_bag_button.text = "Cerrar mochila" if opening else "Abrir mochila"
+	if opening:
+		bag_grid_view.init(_inventory, bag.grid, [inventory_panel, bag_panel])
+		_refresh_bag_weight_label()
+
+## Muestra cuánto espacio (peso interno) lleva usado la mochila -- esto es
+## el límite propio de la mochila (internal_max_weight), sin el descuento
+## de external_weight_multiplier: es "cuánto le cabe", no "cuánto se nota
+## en el peso del jugador".
+func _refresh_bag_weight_label() -> void:
+	var bag: EquippedBag = _inventory.get_equipped("bag")
+	if bag == null:
+		return
+	bag_weight_label.text = "Espacio: %.1f / %.1f kg" % [bag.grid.get_current_weight(), bag.grid.max_weight]
 
 func _on_drop_bag_pressed() -> void:
 	_inventory.drop_equipped_bag()
@@ -265,11 +366,13 @@ func _refresh_hotbar() -> void:
 		slot_node.refresh()
 
 func _build_grid() -> void:
-	grid_view.init(_inventory)
-	# TODO (Capa 3, paso 2): dibujar los items colocados encima de la grilla.
+	grid_view.init(_inventory, _inventory.body_grid, [inventory_panel, bag_panel])
 
 func _refresh_grid() -> void:
 	grid_view.refresh()
+	if bag_panel.visible:
+		bag_grid_view.refresh()
+		_refresh_bag_weight_label()
 
 func _on_weight_changed(current: float, max_w: float) -> void:
 	var suffix := ""
@@ -289,14 +392,24 @@ func _on_weight_tier_changed(tier: InventoryManager.WeightTier) -> void:
 		InventoryManager.WeightTier.NORMAL:
 			weight_label.remove_theme_color_override("font_color")
 
+func _grid_view_for(grid: ItemGrid) -> ItemGridView:
+	if grid == _inventory.body_grid:
+		return grid_view
+	return bag_grid_view
+
+func _clear_all_selections() -> void:
+	grid_view.set_selected(null)
+	bag_grid_view.set_selected(null)
+
 func _on_grid_item_selected(entry: Dictionary) -> void:
 	_selected_entry = entry
-	grid_view.set_selected(entry)
+	_clear_all_selections()
+	_grid_view_for(entry.grid).set_selected(entry)
 	_refresh_item_info()
 
 func _on_grid_empty_clicked() -> void:
 	_selected_entry = null
-	grid_view.set_selected(null)
+	_clear_all_selections()
 	_refresh_item_info()
 
 func _refresh_item_info() -> void:
@@ -321,7 +434,7 @@ func _on_use_pressed() -> void:
 		_stats.use_consumable(data)
 		_inventory.consume_one(_selected_entry)
 		_selected_entry = null
-		grid_view.set_selected(null)
+		_clear_all_selections()
 		_refresh_item_info()
 
 func _on_grid_item_context(entry: Dictionary, global_pos: Vector2) -> void:
@@ -336,7 +449,7 @@ func _on_ctx_use() -> void:
 		_stats.use_consumable(_context_entry.data)
 		_inventory.consume_one(_context_entry)
 		_selected_entry = null
-		grid_view.set_selected(null)
+		_clear_all_selections()
 		_refresh_item_info()
 	_close_context()
 
@@ -344,7 +457,7 @@ func _on_ctx_equip() -> void:
 	if _context_entry != null and _context_entry.data is EquipmentData:
 		_inventory.equip_from_entry(_context_entry)
 		_selected_entry = null
-		grid_view.set_selected(null)
+		_clear_all_selections()
 		_refresh_item_info()
 	_close_context()
 
@@ -352,7 +465,7 @@ func _on_ctx_drop() -> void:
 	if _context_entry != null:
 		_inventory.drop_entry(_context_entry)
 		_selected_entry = null
-		grid_view.set_selected(null)
+		_clear_all_selections()
 		_refresh_item_info()
 	_close_context()
 

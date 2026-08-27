@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://7wwa43ml7t5y"]
 
-[ext_resource type="Script" uid="uid://dvdhfomp7thd6" path="res://scripts/items/consumables/almond_water.gd" id="1_ky1gv"]
+[ext_resource type="Script" uid="uid://dvdhfomp7thd6" path="res://scripts/items/pickups/almond_water.gd" id="1_ky1gv"]
 [ext_resource type="Resource" uid="uid://bh8jy68aby4ky" path="res://resources/items/consumables/almond_water.tres" id="2_voqqc"]
 
 [sub_resource type="Gradient" id="Gradient_xueyp"]

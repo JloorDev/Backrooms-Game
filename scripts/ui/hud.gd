@@ -52,6 +52,8 @@ class_name HUD
 @onready var bag_grid_view:    ItemGridView = %BagGridView
 @onready var bag_weight_label: Label        = %BagWeightLabel
 
+@onready var toast_container: VBoxContainer = %ToastContainer
+
 const COLOR_HIGH: Color = Color(0.20, 0.75, 0.25)
 const COLOR_MID:  Color = Color(0.90, 0.70, 0.10)
 const COLOR_LOW:  Color = Color(0.85, 0.25, 0.10)
@@ -234,6 +236,7 @@ func _connect_signals() -> void:
 	_stats.thirst.thirst_changed.connect(_on_thirst_changed)
 	_stats.sanity.sanity_changed.connect(_on_sanity_changed)
 	_inventory.inventory_changed.connect(_refresh_grid)
+	_inventory.item_picked_up.connect(_on_item_picked_up)
 	_inventory.weight_changed.connect(_on_weight_changed)
 	_inventory.weight_tier_changed.connect(_on_weight_tier_changed)
 	_inventory.equipment_changed.connect(_refresh_equipped_bag)
@@ -304,6 +307,52 @@ func _refresh_bag_weight_label() -> void:
 
 func _on_drop_bag_pressed() -> void:
 	_inventory.drop_equipped_bag()
+
+# ─────────────────────────────────────────
+#  Toast (aviso de "recogiste algo")
+# ─────────────────────────────────────────
+# Estilo lista-de-Minecraft: cada objeto que recoges se agrega como su
+# propia entrada al final de ToastContainer (queda abajo del todo), y como
+# el contenedor está anclado por su borde inferior y crece hacia arriba,
+# las entradas anteriores quedan empujadas hacia arriba solas, sin que
+# tengamos que mover nada a mano. Cada entrada vive su propia vida (aparece,
+# espera, se desvanece y se borra) sin depender de las demás -- por eso ya
+# no hace falta ninguna cola: pueden convivir varias al mismo tiempo.
+# - JloorDev
+const TOAST_SHOW_DURATION: float = 2.2
+const TOAST_FADE_DURATION: float = 0.25
+const TOAST_MAX_ENTRIES: int = 8
+
+func _on_item_picked_up(data: ItemData, quantity: int) -> void:
+	_add_toast_entry(data, quantity)
+
+func _add_toast_entry(data: ItemData, quantity: int) -> void:
+	if toast_container.get_child_count() >= TOAST_MAX_ENTRIES:
+		toast_container.get_child(0).queue_free()
+
+	var row := HBoxContainer.new()
+	row.size_flags_horizontal = Control.SIZE_SHRINK_END
+	row.add_theme_constant_override("separation", 6)
+	row.modulate.a = 0.0
+
+	var label := Label.new()
+	label.text = "+%d %s" % [quantity, data.display_name]
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	row.add_child(label)
+
+	var icon := TextureRect.new()
+	icon.custom_minimum_size = Vector2(20, 20)
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.texture = data.icon
+	row.add_child(icon)
+
+	toast_container.add_child(row)
+
+	var tw := create_tween()
+	tw.tween_property(row, "modulate:a", 1.0, TOAST_FADE_DURATION)
+	tw.tween_interval(TOAST_SHOW_DURATION)
+	tw.tween_property(row, "modulate:a", 0.0, TOAST_FADE_DURATION)
+	tw.tween_callback(row.queue_free)
 
 func _refresh_all() -> void:
 	_target["health"]  = (_stats.health  / _stats.max_health)  * 100.0

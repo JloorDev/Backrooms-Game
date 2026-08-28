@@ -15,6 +15,7 @@ class_name InventoryManager
 
 signal inventory_changed
 signal item_dropped(data:ItemData)
+signal item_picked_up(data:ItemData, quantity:int)
 signal weight_changed(current:float, max_weight:float)
 signal weight_tier_changed(tier:WeightTier)
 signal equipment_changed
@@ -50,6 +51,7 @@ func add_item(data:ItemData, quantity:int = 1) -> bool:
 		return false
 	inventory_changed.emit()
 	_emit_weight_signals()
+	item_picked_up.emit(data, quantity)
 	return true
 
 func remove_item(entry:Dictionary) -> void:

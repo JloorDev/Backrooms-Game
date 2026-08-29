@@ -1,7 +1,7 @@
 extends Resource
 class_name ItemData
 
-enum Rarity { COMUN, POCO_COMUN, RARO, ANOMALO }
+enum Rarity { COMMON, UNCOMMON, RARE, ANOMALOUS }
 
 @export var id:String = ""
 @export var display_name:String = ""
@@ -11,14 +11,14 @@ enum Rarity { COMUN, POCO_COMUN, RARO, ANOMALO }
 @export var max_stack:int = 1
 @export var grid_width: int = 1
 @export var grid_height: int = 1
-@export var rarity: Rarity = Rarity.COMUN
+@export var rarity: Rarity = Rarity.COMMON
 
 func get_rarity_name() -> String:
 	match rarity:
-		Rarity.POCO_COMUN: return "Poco común"
-		Rarity.RARO: return "Raro"
-		Rarity.ANOMALO: return "Anómalo"
-		_: return "Común"
+		Rarity.UNCOMMON: return "Uncommon"
+		Rarity.RARE: return "Rare"
+		Rarity.ANOMALOUS: return "Anomalous"
+		_: return "Common"
 
 static func format_stat(label: String, value: float) -> String:
 	var hex := "88ff88" if value >= 0.0 else "ff8888"

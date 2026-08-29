@@ -1,21 +1,6 @@
 extends Node
 class_name PlayerStateManager
 
-# Mira los porcentajes de hambre/sed/fatiga/cordura/estamina cada medio
-# segundo (no cada frame, no hace falta) y arma una lista de "estados"
-# activos (ej: HUNGRY + TIRED + WINDED a la vez, se pueden acumular).
-# Cada estado tiene su penalización en STATE_PENALTIES, y ESTE script
-# suma todas esas penalizaciones -- pero OJO, no las aplica él mismo.
-# Solo calcula los números; quien realmente los usa es StatsManager
-# (multiplicando la velocidad, el drenaje de estamina, etc.) y
-# PlayerMovement (preguntando can_run()/can_jog()).
-#
-# Nota aparte: la fatiga (TIRED/EXHAUSTED/DEAD_TIRED) NO lleva penalización
-# de velocidad ni estamina en la tabla de acá abajo -- eso ya lo maneja
-# FatigueStat con su propio sistema de niveles. Si le pones penalización
-# acá también, se aplica dos veces sin que se note a simple vista.
-# - JloorDev
-
 signal states_changed(active_states: Array)
 
 enum PlayerState {
@@ -77,26 +62,26 @@ const STATE_PENALTIES: Dictionary = {
 
 # Nombres para mostrar en consola / UI
 const STATE_NAMES: Dictionary = {
-	PlayerState.FULL:         "Lleno",
-	PlayerState.SATIATED:     "Saciado",
-	PlayerState.PECKISH:      "Algo de hambre",
-	PlayerState.HUNGRY:       "Hambriento",
-	PlayerState.VERY_HUNGRY:  "Muy hambriento",
-	PlayerState.STARVING:     "Muriendo de hambre",
-	PlayerState.HYDRATED:     "Hidratado",
-	PlayerState.THIRSTY:      "Sediento",
-	PlayerState.VERY_THIRSTY: "Muy sediento",
-	PlayerState.DEHYDRATED:   "Deshidratado",
-	PlayerState.RESTED:       "Descansado",
-	PlayerState.TIRED:        "Cansado",
-	PlayerState.EXHAUSTED:    "Agotado",
-	PlayerState.DEAD_TIRED:   "Sin fuerzas",
-	PlayerState.COMPOSED:     "Tranquilo",
-	PlayerState.ANXIOUS:      "Ansioso",
-	PlayerState.DISTRESSED:   "Angustiado",
-	PlayerState.PANICKING:    "En pánico",
-	PlayerState.WINDED:       "Sin aliento",
-	PlayerState.OVERLOADED:   "Sobrecargado",
+	PlayerState.FULL:         "Full",
+	PlayerState.SATIATED:     "Satiated",
+	PlayerState.PECKISH:      "A bit hungry",
+	PlayerState.HUNGRY:       "Hungry",
+	PlayerState.VERY_HUNGRY:  "Very hungry",
+	PlayerState.STARVING:     "Starving",
+	PlayerState.HYDRATED:     "Hydrated",
+	PlayerState.THIRSTY:      "Thirsty",
+	PlayerState.VERY_THIRSTY: "Very thirsty",
+	PlayerState.DEHYDRATED:   "Dehydrated",
+	PlayerState.RESTED:       "Rested",
+	PlayerState.TIRED:        "Tired",
+	PlayerState.EXHAUSTED:    "Exhausted",
+	PlayerState.DEAD_TIRED:   "Dead tired",
+	PlayerState.COMPOSED:     "Composed",
+	PlayerState.ANXIOUS:      "Anxious",
+	PlayerState.DISTRESSED:   "Distressed",
+	PlayerState.PANICKING:    "Panicking",
+	PlayerState.WINDED:       "Winded",
+	PlayerState.OVERLOADED:   "Overloaded",
 }
 
 @onready var stats:StatsManager = $"../StatsManager"
@@ -237,8 +222,8 @@ func _print_states() -> void:
 	var names: Array = []
 	for s in _active_states:
 		names.append(STATE_NAMES.get(s, "?"))
-	print("[Estados] ", " | ".join(names))
-	print("  Velocidad: x%.2f | StaDrain: x%.2f | SanDrain: +%.3f" % [
+	print("[States] ", " | ".join(names))
+	print("  Speed: x%.2f | StaDrain: x%.2f | SanDrain: +%.3f" % [
 		get_speed_multiplier(),
 		get_stamina_drain_mult(),
 		get_sanity_drain_extra()

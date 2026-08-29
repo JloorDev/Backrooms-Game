@@ -18,14 +18,12 @@ class_name HUD
 
 @onready var stats_panel:      Panel         = %StatsPanel
 @onready var inventory_panel:  Panel         = %InventoryPanel
-@onready var player_panel:     Panel         = %PlayerPanel
 @onready var quick_bar:        VBoxContainer = %QuickBar
 @onready var quickbar_hover_zone: Control    = %QuickBarHoverZone
 @onready var states_container: VBoxContainer = %StatesContainer
 
 @onready var btn_stats:     Button = %BtnStats
 @onready var btn_inventory: Button = %BtnInventory
-@onready var btn_player:    Button = %BtnPlayer
 
 @onready var grid_view:        ItemGridView = %ItemGridView
 @onready var weight_label:     Label        = %WeightLabel
@@ -90,7 +88,7 @@ var _quickbar_tween: Tween = null
 var _quickbar_hover_token: int = 0
 
 func _any_panel_open() -> bool:
-	return stats_panel.visible or inventory_panel.visible or player_panel.visible or bag_panel.visible
+	return stats_panel.visible or inventory_panel.visible or bag_panel.visible
 
 func _update_quickbar_dim() -> void:
 	_quickbar_hover_token += 1
@@ -158,7 +156,6 @@ func init(stats: StatsManager, inventory: InventoryManager, psm: PlayerStateMana
 
 	stats_panel.visible    = false
 	inventory_panel.visible = false
-	player_panel.visible   = false
 	bag_panel.visible      = false
 
 	quick_bar.position.x = QUICKBAR_SHOWN_X
@@ -176,7 +173,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_close_context()
 
 func _toggle_stats() -> void:
+	var opening: bool = not stats_panel.visible
 	stats_panel.toggle()
+	if opening and _psm:
+		_refresh_states_panel(_psm.get_active_states())
 
 func _toggle_inventory() -> void:
 	var opening: bool = not inventory_panel.visible
@@ -185,17 +185,11 @@ func _toggle_inventory() -> void:
 		# no tiene sentido dejar la mochila abierta sola si cerraste el
 		# inventario general -- se cierra junto con él.
 		bag_panel.close()
-		open_bag_button.text = "Abrir mochila"
+		open_bag_button.text = "Open bag"
 	_close_context()
 	_selected_entry = null
 	_clear_all_selections()
 	_refresh_item_info()
-
-func _toggle_player_panel() -> void:
-	var opening: bool = not player_panel.visible
-	player_panel.toggle()
-	if opening and _psm:
-		_refresh_states_panel(_psm.get_active_states())
 
 # ─────────────────────────────────────────
 #  Animación barras
@@ -255,9 +249,8 @@ func _connect_signals() -> void:
 	ctx_equip.pressed.connect(_on_ctx_equip)
 	btn_stats.pressed.connect(_toggle_stats)
 	btn_inventory.pressed.connect(_toggle_inventory)
-	btn_player.pressed.connect(_toggle_player_panel)
 
-	for panel in [stats_panel, inventory_panel, player_panel, bag_panel]:
+	for panel in [stats_panel, inventory_panel, bag_panel]:
 		panel.opened.connect(_update_quickbar_dim)
 		panel.closed.connect(_update_quickbar_dim)
 
@@ -270,10 +263,10 @@ func _refresh_equipped_bag() -> void:
 	var bag: EquippedBag = _inventory.get_equipped("bag")
 	if bag == null:
 		equipped_bag_icon.texture = null
-		equipped_bag_label.text = "Sin mochila"
+		equipped_bag_label.text = "No bag"
 		drop_bag_button.visible = false
 		open_bag_button.visible = false
-		open_bag_button.text = "Abrir mochila"
+		open_bag_button.text = "Open bag"
 		bag_panel.visible = false  # de golpe, no con animación: ya no hay mochila que mostrar
 		_update_quickbar_dim()  # bag_panel.visible cambió sin pasar por close(), así que esto no se enteró solo
 	else:
@@ -291,7 +284,7 @@ func _toggle_bag_panel() -> void:
 		return
 	var opening: bool = not bag_panel.visible
 	bag_panel.toggle()
-	open_bag_button.text = "Cerrar mochila" if opening else "Abrir mochila"
+	open_bag_button.text = "Close bag" if opening else "Open bag"
 	if opening:
 		bag_grid_view.init(_inventory, bag.grid, [inventory_panel, bag_panel])
 		_refresh_bag_weight_label()
@@ -304,7 +297,7 @@ func _refresh_bag_weight_label() -> void:
 	var bag: EquippedBag = _inventory.get_equipped("bag")
 	if bag == null:
 		return
-	bag_weight_label.text = "Espacio: %.1f / %.1f kg" % [bag.grid.get_current_weight(), bag.grid.max_weight]
+	bag_weight_label.text = "Space: %.1f / %.1f kg" % [bag.grid.get_current_weight(), bag.grid.max_weight]
 
 func _on_drop_bag_pressed() -> void:
 	_inventory.drop_equipped_bag()
@@ -370,7 +363,7 @@ func _on_thirst_changed(_v: float, pct: float)  -> void: _target["thirst"]  = pc
 func _on_sanity_changed(_v: float, pct: float)  -> void: _target["sanity"]  = pct * 100.0
 
 func _on_states_changed(active_states: Array) -> void:
-	if not player_panel.visible:
+	if not stats_panel.visible:
 		return
 	_refresh_states_panel(active_states)
 
@@ -428,10 +421,10 @@ func _on_weight_changed(current: float, max_w: float) -> void:
 	var suffix := ""
 	match _inventory.get_weight_tier():
 		InventoryManager.WeightTier.CRITICAL:
-			suffix = " -- ¡SOBRECARGA CRÍTICA!"
+			suffix = " -- CRITICAL OVERLOAD!"
 		InventoryManager.WeightTier.OVERLOADED:
-			suffix = " -- Sobrecargado"
-	weight_label.text = "Peso: %.1f / %.1f kg%s" % [current, max_w, suffix]
+			suffix = " -- Overloaded"
+	weight_label.text = "Weight: %.1f / %.1f kg%s" % [current, max_w, suffix]
 
 func _on_weight_tier_changed(tier: InventoryManager.WeightTier) -> void:
 	match tier:
@@ -484,12 +477,12 @@ func _refresh_item_info() -> void:
 ## - JloorDev
 func _get_category_name(data: ItemData) -> String:
 	if data is ConsumableData:
-		return "Consumible"
+		return "Consumable"
 	if data is EquipmentData:
-		return "Equipo"
+		return "Equipment"
 	if data is NostalgiaData:
-		return "Objeto de nostalgia"
-	return "Objeto"
+		return "Nostalgia item"
+	return "Item"
 
 ## Un solo lugar que sabe "usar" cualquier tipo de ítem consumible -- así
 ## el botón del panel y la opción del menú contextual (más abajo) no tienen

@@ -14,8 +14,8 @@ class_name EquipmentData
 func get_stat_lines() -> Array[String]:
 	var lines: Array[String] = []
 	if hotbar_slot_bonus != 0:
-		lines.append("Slots de hotbar: +%d" % hotbar_slot_bonus)
-	lines.append("Espacio interno: %dx%d" % [internal_grid_width, internal_grid_height])
-	lines.append("Peso interno máx: %.1f" % internal_max_weight)
-	lines.append("Reduce el peso de su contenido en %d%%" % roundi((1.0 - external_weight_multiplier) * 100.0))
+		lines.append("Hotbar slots: +%d" % hotbar_slot_bonus)
+	lines.append("Internal space: %dx%d" % [internal_grid_width, internal_grid_height])
+	lines.append("Max internal weight: %.1f" % internal_max_weight)
+	lines.append("Reduces its contents' weight by %d%%" % roundi((1.0 - external_weight_multiplier) * 100.0))
 	return lines

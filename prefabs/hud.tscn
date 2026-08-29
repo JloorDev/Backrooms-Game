@@ -6,31 +6,61 @@
 [ext_resource type="Script" uid="uid://dvewd0vwpeni5" path="res://scripts/ui/inventory/item_grid_view.gd" id="3_ia4ll"]
 [ext_resource type="Texture2D" uid="uid://bp1c542ycb28i" path="res://sprites/hud/inventory.png" id="4_d7ypv"]
 [ext_resource type="Script" uid="uid://bmayhmr4f2kw5" path="res://scripts/ui/hover_button.gd" id="4_mbxvq"]
-[ext_resource type="Texture2D" uid="uid://d0xolr4vlk04v" path="res://sprites/hud/player.png" id="5_env85"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health"]
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stamina"]
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thirst"]
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hunger"]
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sanity"]
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [node name="HUD" type="CanvasLayer" unique_id=1040680160]
 script = ExtResource("1_73jnp")
 
 [node name="StatsPanel" type="Panel" parent="." unique_id=1932834618]
 unique_name_in_owner = true
-visible = false
-offset_left = 10.0
-offset_top = 10.0
-offset_right = 315.0
-offset_bottom = 185.0
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -346.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 426.0
+grow_horizontal = 0
 script = ExtResource("2_3ehsa")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="StatsPanel" unique_id=1277507178]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -145.5
-offset_top = -79.5
-offset_right = 145.5
-offset_bottom = 79.5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 15.0
+offset_top = 15.0
+offset_right = -15.0
+offset_bottom = -15.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 6
@@ -40,60 +70,89 @@ layout_mode = 2
 
 [node name="Label" type="Label" parent="StatsPanel/VBoxContainer/HealthBar" unique_id=1193745597]
 layout_mode = 2
-text = "Vida"
+text = "Health"
 
 [node name="HealthProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/HealthBar" unique_id=848269074]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+size_flags_horizontal = 10
+theme_override_styles/fill = SubResource("StyleBoxFlat_health")
 
 [node name="StaminaBar" type="HBoxContainer" parent="StatsPanel/VBoxContainer" unique_id=557098878]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="StatsPanel/VBoxContainer/StaminaBar" unique_id=1402844157]
 layout_mode = 2
-text = "Resistencia"
+text = "Stamina"
 
 [node name="StaminaProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/StaminaBar" unique_id=1401776136]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+size_flags_horizontal = 10
+theme_override_styles/fill = SubResource("StyleBoxFlat_stamina")
 
 [node name="ThirstBar" type="HBoxContainer" parent="StatsPanel/VBoxContainer" unique_id=820504505]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="StatsPanel/VBoxContainer/ThirstBar" unique_id=1931185210]
 layout_mode = 2
-text = "Sed"
+text = "Thirst"
 
 [node name="ThirstProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/ThirstBar" unique_id=402840745]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+size_flags_horizontal = 10
+theme_override_styles/fill = SubResource("StyleBoxFlat_thirst")
 
 [node name="HungerBar" type="HBoxContainer" parent="StatsPanel/VBoxContainer" unique_id=1919928727]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="StatsPanel/VBoxContainer/HungerBar" unique_id=176099496]
 layout_mode = 2
-text = "Hambre"
+text = "Hunger"
 
 [node name="HungerProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/HungerBar" unique_id=866497096]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+size_flags_horizontal = 10
+theme_override_styles/fill = SubResource("StyleBoxFlat_hunger")
 
 [node name="SanityBar" type="HBoxContainer" parent="StatsPanel/VBoxContainer" unique_id=1573232785]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="StatsPanel/VBoxContainer/SanityBar" unique_id=198814635]
 layout_mode = 2
-text = "Cordura"
+text = "Sanity"
 
 [node name="SanityProgressBar" type="ProgressBar" parent="StatsPanel/VBoxContainer/SanityBar" unique_id=484999999]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+size_flags_horizontal = 10
+theme_override_styles/fill = SubResource("StyleBoxFlat_sanity")
+
+[node name="StatesSeparator" type="HSeparator" parent="StatsPanel/VBoxContainer" unique_id=1277507179]
+layout_mode = 2
+
+[node name="StatesLabel" type="Label" parent="StatsPanel/VBoxContainer" unique_id=1277507180]
+layout_mode = 2
+text = "Active states"
+horizontal_alignment = 1
+
+[node name="StatesScroll" type="ScrollContainer" parent="StatsPanel/VBoxContainer" unique_id=1277507181]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="StatesContainer" type="VBoxContainer" parent="StatsPanel/VBoxContainer/StatesScroll" unique_id=1111111113]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
 
 [node name="InventoryPanel" type="Panel" parent="." unique_id=1630681326]
 unique_name_in_owner = true
@@ -230,6 +289,7 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 12
 text = "Use \"R\" To Use"
+script = ExtResource("4_mbxvq")
 
 [node name="ContextMenu" type="Panel" parent="InventoryPanel" unique_id=261886804]
 unique_name_in_owner = true
@@ -250,19 +310,20 @@ theme_override_constants/separation = 6
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 4
-theme_override_font_sizes/font_size = 6
 text = "Use"
+script = ExtResource("4_mbxvq")
 
 [node name="CtxDropButton" type="Button" parent="InventoryPanel/ContextMenu/VBoxContainer" unique_id=1439352796]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 6
 text = "Drop"
+script = ExtResource("4_mbxvq")
 
 [node name="CtxEquipButton" type="Button" parent="InventoryPanel/ContextMenu/VBoxContainer" unique_id=1783380538]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Equip"
+script = ExtResource("4_mbxvq")
 
 [node name="EquippedBagIcon" type="TextureRect" parent="InventoryPanel" unique_id=913182741]
 unique_name_in_owner = true
@@ -286,7 +347,8 @@ offset_top = 46.0
 offset_right = 92.0
 offset_bottom = 70.0
 theme_override_font_sizes/font_size = 11
-text = "Soltar mochila"
+text = "Drop bag"
+script = ExtResource("4_mbxvq")
 
 [node name="OpenBagButton" type="Button" parent="InventoryPanel" unique_id=541112476]
 unique_name_in_owner = true
@@ -296,7 +358,8 @@ offset_top = 46.0
 offset_right = 190.0
 offset_bottom = 70.0
 theme_override_font_sizes/font_size = 11
-text = "Abrir mochila"
+text = "Open bag"
+script = ExtResource("4_mbxvq")
 
 [node name="BagPanel" type="Panel" parent="." unique_id=634913710]
 unique_name_in_owner = true
@@ -317,7 +380,7 @@ offset_top = 10.0
 offset_right = 60.0
 offset_bottom = 33.0
 grow_horizontal = 2
-text = "Mochila"
+text = "Bag"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -345,33 +408,6 @@ offset_right = 224.0
 offset_bottom = 214.0
 script = ExtResource("3_ia4ll")
 
-[node name="PlayerPanel" type="Panel" parent="." unique_id=1111111111]
-unique_name_in_owner = true
-visible = false
-offset_left = 330.0
-offset_top = 10.0
-offset_right = 530.0
-offset_bottom = 250.0
-script = ExtResource("2_3ehsa")
-
-[node name="ScrollContainer" type="ScrollContainer" parent="PlayerPanel" unique_id=1111111112]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="StatesContainer" type="VBoxContainer" parent="PlayerPanel/ScrollContainer" unique_id=1111111113]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 4
-
 [node name="ToastContainer" type="VBoxContainer" parent="." unique_id=1111111130]
 unique_name_in_owner = true
 anchors_preset = 3
@@ -394,7 +430,7 @@ unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
 offset_right = 150.0
-offset_bottom = 310.0
+offset_bottom = 160.0
 mouse_filter = 1
 
 [node name="QuickBar" type="VBoxContainer" parent="." unique_id=2038044285]
@@ -402,7 +438,7 @@ unique_name_in_owner = true
 offset_left = 10.0
 offset_top = 10.0
 offset_right = 80.0
-offset_bottom = 268.0
+offset_bottom = 164.0
 theme_override_constants/separation = 24
 
 [node name="BtnStats" type="Button" parent="QuickBar" unique_id=1111111115]
@@ -421,16 +457,6 @@ custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
 tooltip_text = "Inventory"
 icon = ExtResource("4_d7ypv")
-icon_alignment = 1
-expand_icon = true
-script = ExtResource("4_mbxvq")
-
-[node name="BtnPlayer" type="Button" parent="QuickBar" unique_id=1111111117]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(60, 60)
-layout_mode = 2
-tooltip_text = "Player Status"
-icon = ExtResource("5_env85")
 icon_alignment = 1
 expand_icon = true
 script = ExtResource("4_mbxvq")

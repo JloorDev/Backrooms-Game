@@ -1,8 +1,8 @@
 extends Area2D
 class_name PickupItem
 
-@export var prompt_text: String = "Presiona E para recoger"
-@export var full_inventory_text: String = "Inventario lleno"
+@export var prompt_text: String = "Press E to pick up"
+@export var full_inventory_text: String = "Inventory full"
 
 @onready var prompt: Label   = $InteractPrompt
 @onready var sprite: Sprite2D = $Sprite2D
@@ -96,5 +96,5 @@ func _play_pickup_animation() -> void:
 	tw.tween_callback(queue_free)
 
 func _pick_up(_player: CharacterBody2D) -> bool:
-	push_warning("PickupItem: _pick_up() no implementado en %s" % get_script().resource_path)
+	push_warning("PickupItem: _pick_up() not implemented in %s" % get_script().resource_path)
 	return false

@@ -7,7 +7,8 @@
 script = ExtResource("2_1xhhl")
 hotbar_slot_bonus = 2
 id = "backpack_basic"
-display_name = "Backpack Basic"
-description = "Hi!"
+display_name = "Basic Backpack"
+description = "A durable canvas backpack. It holds more than it looks like it would."
 icon = ExtResource("1_hcbqq")
 weight = 1.15
+rarity = 1

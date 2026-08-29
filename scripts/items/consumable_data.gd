@@ -10,13 +10,13 @@ class_name ConsumableData
 func get_stat_lines() -> Array[String]:
 	var lines: Array[String] = []
 	if thirst_restore != 0.0:
-		lines.append("Sed: %+.0f" % thirst_restore)
+		lines.append(ItemData.format_stat("Sed", thirst_restore))
 	if hunger_restore != 0.0:
-		lines.append("Hambre: %+.0f" % hunger_restore)
+		lines.append(ItemData.format_stat("Hambre", hunger_restore))
 	if sanity_restore != 0.0:
-		lines.append("Cordura: %+.0f" % sanity_restore)
+		lines.append(ItemData.format_stat("Cordura", sanity_restore))
 	if health_restore != 0.0:
-		lines.append("Salud: %+.0f" % health_restore)
+		lines.append(ItemData.format_stat("Salud", health_restore))
 	if stamina_restore != 0.0:
-		lines.append("Resistencia: %+.0f" % stamina_restore)
+		lines.append(ItemData.format_stat("Resistencia", stamina_restore))
 	return lines

@@ -152,6 +152,7 @@ grow_vertical = 2
 script = ExtResource("3_ia4ll")
 
 [node name="ItemInfoPanel" type="Panel" parent="InventoryPanel" unique_id=1789818475]
+clip_contents = true
 layout_mode = 1
 anchors_preset = 6
 anchor_left = 1.0
@@ -165,50 +166,52 @@ offset_bottom = 137.0
 grow_horizontal = 0
 grow_vertical = 2
 
-[node name="ItemNameLabel" type="Label" parent="InventoryPanel/ItemInfoPanel" unique_id=1322671734]
+[node name="InfoVBox" type="VBoxContainer" parent="InventoryPanel/ItemInfoPanel" unique_id=1322671740]
 unique_name_in_owner = true
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -20.0
-offset_top = 8.0
-offset_right = 20.0
-offset_bottom = 31.0
-grow_horizontal = 2
-theme_override_font_sizes/font_size = 14
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ItemDescLabel" type="Label" parent="InventoryPanel/ItemInfoPanel" unique_id=786634809]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -20.0
-offset_top = 48.0
-offset_right = 20.0
-offset_bottom = 71.0
-grow_horizontal = 2
-theme_override_font_sizes/font_size = 12
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ItemStatsLabel" type="Label" parent="InventoryPanel/ItemInfoPanel" unique_id=412694770]
-unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = 36.5
-offset_right = 20.0
-offset_bottom = 59.5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -44.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="ItemNameLabel" type="Label" parent="InventoryPanel/ItemInfoPanel/InfoVBox" unique_id=1322671734]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ItemCategoryLabel" type="Label" parent="InventoryPanel/ItemInfoPanel/InfoVBox" unique_id=1322671741]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+
+[node name="ItemDescLabel" type="RichTextLabel" parent="InventoryPanel/ItemInfoPanel/InfoVBox" unique_id=786634809]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
+autowrap_mode = 2
+
+[node name="ItemStatsLabel" type="RichTextLabel" parent="InventoryPanel/ItemInfoPanel/InfoVBox" unique_id=412694770]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/normal_font_size = 12
+bbcode_enabled = true
+fit_content = true
+scroll_active = false
 autowrap_mode = 2
 
 [node name="UseButton" type="Button" parent="InventoryPanel/ItemInfoPanel" unique_id=2118194487]

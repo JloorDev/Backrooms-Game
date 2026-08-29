@@ -29,9 +29,10 @@ class_name HUD
 
 @onready var grid_view:        ItemGridView = %ItemGridView
 @onready var weight_label:     Label        = %WeightLabel
-@onready var item_name_label:  Label        = %ItemNameLabel
-@onready var item_desc_label:  Label        = %ItemDescLabel
-@onready var item_stats_label: Label        = %ItemStatsLabel
+@onready var item_name_label:   Label         = %ItemNameLabel
+@onready var item_category_label: Label       = %ItemCategoryLabel
+@onready var item_desc_label:   RichTextLabel = %ItemDescLabel
+@onready var item_stats_label:  RichTextLabel = %ItemStatsLabel
 @onready var equipped_bag_icon:  TextureRect = %EquippedBagIcon
 @onready var equipped_bag_label: Label       = %EquippedBagLabel
 @onready var drop_bag_button:    Button      = %DropBagButton
@@ -464,42 +465,63 @@ func _on_grid_empty_clicked() -> void:
 func _refresh_item_info() -> void:
 	if _selected_entry == null:
 		item_name_label.text = ""
+		item_category_label.text = ""
 		item_desc_label.text = ""
 		item_stats_label.text = ""
 		use_button.visible   = false
 		return
 	var data: ItemData = _selected_entry.data
 	item_name_label.text = data.display_name
-	item_desc_label.text = data.description
-	item_stats_label.text = "
-".join(data.get_stat_lines())
-	use_button.visible   = data is ConsumableData
+	item_category_label.text = _get_category_name(data)
 
-func _on_use_pressed() -> void:
-	if _selected_entry == null:
-		return
-	var data: ItemData = _selected_entry.data
+	item_desc_label.text = "[center]%s[/center]" % data.description
+
+	item_stats_label.text = "\n".join(data.get_stat_lines())
+	use_button.visible = data is ConsumableData or data is NostalgiaData
+
+## Categoría sobria en texto, en vez del color de rareza -- encaja mejor
+## con el tono del juego que un destello de colores tipo loot de fantasía.
+## - JloorDev
+func _get_category_name(data: ItemData) -> String:
+	if data is ConsumableData:
+		return "Consumible"
+	if data is EquipmentData:
+		return "Equipo"
+	if data is NostalgiaData:
+		return "Objeto de nostalgia"
+	return "Objeto"
+
+## Un solo lugar que sabe "usar" cualquier tipo de ítem consumible -- así
+## el botón del panel y la opción del menú contextual (más abajo) no tienen
+## que repetir la misma lógica cada uno por su lado.
+## - JloorDev
+func _use_entry(entry: Dictionary) -> void:
+	var data: ItemData = entry.data
 	if data is ConsumableData:
 		_stats.use_consumable(data)
-		_inventory.consume_one(_selected_entry)
-		_selected_entry = null
-		_clear_all_selections()
-		_refresh_item_info()
+	elif data is NostalgiaData:
+		_stats.use_nostalgia(data)
+	else:
+		return
+	_inventory.consume_one(entry)
+	_selected_entry = null
+	_clear_all_selections()
+	_refresh_item_info()
+
+func _on_use_pressed() -> void:
+	if _selected_entry != null:
+		_use_entry(_selected_entry)
 
 func _on_grid_item_context(entry: Dictionary, global_pos: Vector2) -> void:
 	_context_entry = entry
 	context_menu.global_position = global_pos
 	context_menu.visible = true
-	ctx_use.visible = entry.data is ConsumableData
+	ctx_use.visible = entry.data is ConsumableData or entry.data is NostalgiaData
 	ctx_equip.visible = entry.data is EquipmentData
 
 func _on_ctx_use() -> void:
-	if _context_entry != null and _context_entry.data is ConsumableData:
-		_stats.use_consumable(_context_entry.data)
-		_inventory.consume_one(_context_entry)
-		_selected_entry = null
-		_clear_all_selections()
-		_refresh_item_info()
+	if _context_entry != null:
+		_use_entry(_context_entry)
 	_close_context()
 
 func _on_ctx_equip() -> void:
